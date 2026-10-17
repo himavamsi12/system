@@ -603,11 +603,12 @@ function tickBar(now){if(!playing)return;elapsed=(now-startT)*speed;drawProgress
 
 // Concept notes under the player: definition, key terms, notes and interview questions for the current episode
 let notesFor=null;
-function renderNotes(force){const N=window.__NOTES,box=$('notes');if(!N||!box||!ep)return;const d=N[ep.id];if(!d){box.innerHTML='';return}
-  if(!force&&notesFor===ep.id)return;notesFor=ep.id;
+let curTopic=null;
+function renderNotes(force){const N=window.__NOTES,box=$('notes');if(!N||!box||!ep)return;const key=curTopic?curTopic.id:ep.id,d=N[key];if(!d){box.innerHTML='';return}
+  if(!force&&notesFor===key)return;notesFor=key;
   const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-  const title=ep.name.replace(/^Episode \d+ · /,'');
-  box.innerHTML=`<header class="nh"><p class="eyebrow">Concept notes · Episode ${ep.n||EPS.indexOf(ep)+1} of ${EPS.length}</p><h2>${esc(title)}</h2></header>
+  const title=curTopic?curTopic.title:ep.name.replace(/^Episode \d+ · /,''),eyebrow=curTopic?`Additional topic · ${window.__EXTRA.indexOf(curTopic)+1} of ${window.__EXTRA.length}`:`Concept notes · Episode ${ep.n||EPS.indexOf(ep)+1} of ${EPS.length}`;
+  box.innerHTML=`<header class="nh"><p class="eyebrow">${esc(eyebrow)}</p><h2>${esc(title)}</h2></header>
 <div class="ngrid">
 <article class="nc ndef"><h3>What is it?</h3><p>${esc(d.def)}</p><h4>Key terms</h4><dl>${d.terms.map(t=>`<div><dt>${esc(t[0])}</dt><dd>${esc(t[1])}</dd></div>`).join('')}</dl></article>
 <article class="nc nnotes"><h3>Notes to remember</h3><ul>${d.notes.map(t=>`<li>${esc(t)}</li>`).join('')}</ul></article>
@@ -616,7 +617,12 @@ function renderNotes(force){const N=window.__NOTES,box=$('notes');if(!N||!box||!
 <div class="nql">${d.qs.map((q,i)=>`<details><summary><i>${String(i+1).padStart(2,'0')}</i><span>${esc(q[0])}</span></summary><p>${esc(q[1])}</p></details>`).join('')}</div>
 <p class="nsrc">Questions reflect topics that recur across public system design interview guides and question banks (DesignGurus, techinterview.org, PracHub, KodeKloud and others). Answers are short talking points; add your own numbers and examples.</p></article>`;
   const all=$('nq-all');all.onclick=()=>{const ds=box.querySelectorAll('.nql details'),open=[...ds].some(x=>!x.open);ds.forEach(x=>x.open=open);all.textContent=open?'Collapse all':'Expand all'}}
-window.addEventListener('notes-ready',()=>renderNotes(true));
+
+function markExtra(){const x=$('extra');if(!x)return;[...x.children].forEach((b,i)=>{const on=!!curTopic&&window.__EXTRA[i]===curTopic;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)})}
+function buildExtra(){const x=$('extra'),E2=window.__EXTRA;if(!x||!E2||x.children.length)return;
+  E2.forEach((t,i)=>{const b=document.createElement('button');b.type='button';b.innerHTML='<i></i><b></b>';b.querySelector('i').textContent=String(EPS.length+i+1).padStart(2,'0');b.querySelector('b').textContent=t.title;b.title=t.sub;
+    b.onclick=()=>{curTopic=t;renderNotes(true);window.__setPage&&window.__setPage('topic')};x.appendChild(b)});markExtra()}
+window.addEventListener('notes-ready',()=>{renderNotes(true);buildExtra()});
 function doneSet(){try{return new Set(JSON.parse(localStorage.getItem('sd-done')||'[]'))}catch(e){return new Set()}}
 function updStats(){if(!ep)return;renderNotes();const f=t=>{t=Math.round(t/1000);return Math.floor(t/60)+':'+String(t%60).padStart(2,'0')};
 const T=total(),p=Math.min(100,Math.round((before(cur)+Math.min(elapsed,dur))/T*100)),d=doneSet(),set=(id,v)=>{const e=$(id);if(e&&e.textContent!==v)e.textContent=v};
@@ -658,7 +664,8 @@ load(EPI,false);
 if(!RM&&'IntersectionObserver' in window)new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting&&!seen&&!userPaused){seen=true;play()}else if(!en.isIntersecting&&playing)pause()}),{threshold:.5}).observe($('player'));
 // Overview (dashboard) vs episode player
 {const wrap=document.querySelector('.wrap'),ov=$('nav-overview');
-const setPage=v=>{wrap.dataset.view=v;ov.classList.toggle('on',v==='overview');ov.setAttribute('aria-pressed',v==='overview');if(v==='overview'&&playing)pause();if(v==='video')window.scrollTo(0,0)};
+const setPage=v=>{wrap.dataset.view=v;ov.classList.toggle('on',v==='overview');ov.setAttribute('aria-pressed',v==='overview');if(v!=='topic'&&curTopic){curTopic=null;renderNotes(true)}markExtra();if(v!=='video'&&playing)pause();if(v==='video'||v==='topic')window.scrollTo(0,0)};
+window.__setPage=setPage;
 ov.onclick=()=>setPage('overview');
 $('tabs').addEventListener('click',()=>setPage('video'),true);
 const sp=$('st-play');if(sp)sp.addEventListener('click',()=>setPage('video'),true);
@@ -670,4 +677,5 @@ mb.onclick=()=>set(!root.classList.contains('nav-open'));sc.onclick=()=>set(fals
 sb.addEventListener('click',e=>{if(e.target.closest('.tabs button,.mi'))set(false)});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&root.classList.contains('nav-open'))set(false)});
 matchMedia('(min-width:1081px)').addEventListener('change',e=>{if(e.matches)set(false)})}
+buildExtra();
 })();

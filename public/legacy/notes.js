@@ -405,5 +405,248 @@ obs: {
     ["When should a rollout roll back automatically?", "When the canary's error rate, latency or saturation is worse than the baseline beyond a threshold for a set time, or an SLO burn alert fires. Define the metrics and thresholds before the release, and keep the rollback fast and tested."]
   ]
 }
+,
+
+est: {
+  def: "Back-of-envelope estimation is quick, rounded maths that turns a product idea into numbers: queries per second (QPS), storage and bandwidth. It tells you the size of the problem and the first hard limit in the opening minutes of a design, so you can choose between one machine, a cache, replicas or sharding.",
+  terms: [
+    ["QPS", "Queries (requests) per second: average and peak"],
+    ["DAU", "Daily active users, the usual starting number"],
+    ["Peak factor", "How much higher peak traffic is than the average, often 2 to 3 times (more for spikes)"],
+    ["Read:write ratio", "How many reads happen per write; decides caching and replicas"],
+    ["Replication factor", "Number of copies stored, commonly 3, so raw storage is multiplied"],
+    ["Powers of two", "2^10 is about a thousand (KB), 2^20 a million (MB), 2^30 a billion (GB)"],
+    ["Latency numbers", "RAM about 100 ns, SSD about 100 microseconds, disk seek about 10 ms, cross-continent round trip about 150 ms"],
+    ["Order of magnitude", "Being right to the nearest power of ten is enough"]
+  ],
+  notes: [
+    "Follow a fixed recipe: users (DAU), actions per user per day, QPS, peak QPS, storage per item, storage per year, bandwidth, then servers.",
+    "Average QPS = DAU x actions per user per day / 86,400. Treat a day as about 100,000 seconds to keep the maths fast, and take peak as 2 to 3 times the average.",
+    "Storage per year = items per day x size per item x 365, then multiply by the replication factor (about 3) and add headroom for indexes and growth.",
+    "Bandwidth = QPS x average payload size. Work out inbound and outbound separately; outbound drives CDN and egress cost.",
+    "Rough capacity per machine: a database around 1,000 to 5,000 simple QPS, an application server 1,000 to 10,000, a cache server 100,000 or more. Use them only to size an order of magnitude.",
+    "Use the numbers to decide: read-heavy and under a few thousand QPS means one database plus a cache; huge writes or data means sharding; large files or video means CDN and object storage.",
+    "State assumptions out loud, round aggressively, show units, and sanity-check the result against a known system."
+  ],
+  qs: [
+    ["Estimate the QPS and storage for a Twitter-like service with 300 million daily users.", "Assume each user reads 100 tweets and posts 0.5 a day. Reads: 300M x 100 / 100,000 s is about 300,000 QPS (peak about 900,000). Writes: 300M x 0.5 / 100,000 is about 1,500 QPS. At 300 bytes a tweet that is about 45 GB a day, about 16 TB a year, about 50 TB with 3 copies, before media. Conclusion: heavily read-skewed, so caching and fan-out matter more than write throughput."],
+    ["How many servers do you need for 50,000 QPS?", "If one application server safely handles about 2,000 QPS, you need about 25 servers for the average, plus headroom for peak (say 2 times) and redundancy across zones, so roughly 50 to 60. Then check that the database and cache can take the load, because the app tier is rarely the limit."],
+    ["How do you estimate bandwidth for a video service?", "Concurrent viewers x bitrate. 1 million viewers at 3 Mbps is 3 Tbps outbound, which is why video is served from CDN edges, not from your origin. Storage is hours uploaded x file size x number of encodings."],
+    ["Why do interviewers ask for estimation first?", "It shows you can size a problem and make decisions from data. The numbers justify the architecture: for example, 100 QPS needs no sharding, while 1 million QPS or petabytes of data does."],
+    ["What latency numbers should you remember?", "Memory is about 100 ns, SSD about 100 microseconds, a disk seek about 10 ms, a round trip inside a data centre about 0.5 ms, and across continents about 150 ms. They explain why caches, replicas near users and avoiding network hops matter."],
+    ["How do you account for peak traffic and growth?", "Multiply average by a peak factor (2 to 3, or more for events), add 30 to 50% headroom, and project growth for one to three years. Design for the peak and scale automatically for the rest."],
+    ["How much storage do 100 million users with 1 MB of data each need?", "100M x 1 MB = 100 TB. With 3 copies that is 300 TB raw, plus indexes and backups, so plan for roughly 400 to 500 TB, and say what would change the number (compression, deduplication, tiering to cold storage)."],
+    ["How do you sanity-check an estimate?", "Compare with a known system, check units, make sure the answer is not off by an obvious factor of 1,000, and check that the parts add up. Interviewers care about reasoning and assumptions more than the exact figure."]
+  ]
+},
+
+idx: {
+  def: "A database index is an extra data structure that lets the database find rows without scanning the whole table, trading slower writes and more storage for faster reads. Storage engines decide how data is laid out on disk: B-tree engines (most relational databases) update pages in place, while LSM-tree engines (Cassandra, RocksDB) append writes in memory and merge them to disk in the background.",
+  terms: [
+    ["B-tree index", "A sorted, balanced tree; fast reads and range scans"],
+    ["LSM tree", "Writes go to memory and sorted files that are merged later"],
+    ["Write amplification", "Physical writes caused by one logical write"],
+    ["Compaction", "Background merging of LSM files that removes old versions"],
+    ["Composite index", "An index on several columns; the column order matters"],
+    ["Covering index", "An index containing every column the query needs"],
+    ["Bloom filter (in LSM)", "Lets a read skip files that cannot hold the key"],
+    ["Normalisation vs denormalisation", "Avoid duplicated data vs duplicate it to speed up reads"]
+  ],
+  notes: [
+    "Indexes speed up reads (lookups, joins, sorting, range queries) but every insert, update and delete must also update each index, so more indexes mean slower writes and more storage.",
+    "B-trees keep data sorted in pages, update in place, and give predictable reads and range scans. They are the default in PostgreSQL, MySQL and most relational databases.",
+    "LSM trees buffer writes in a memtable, flush sorted files (SSTables) and compact them in the background. Writes are very fast; reads may check several files, helped by Bloom filters.",
+    "Rule of thumb: B-tree pays on the write to keep reads simple; LSM pays on the read and in compaction to keep writes cheap. Choose B-tree for read-heavy or mixed transactional work, LSM for write-heavy or time-series workloads.",
+    "Index design: put equality columns first and range columns last in a composite index, index columns used in WHERE, JOIN and ORDER BY, and use covering indexes for hot queries. Check plans with EXPLAIN.",
+    "Deletes in LSM engines write tombstones, which are cleaned up only during compaction, so many tombstones can slow reads.",
+    "SQL vs NoSQL: choose relational for structured data, joins and transactions; choose key-value, document, wide-column or graph stores when the access pattern or scale demands it. Model NoSQL data around your queries, and accept duplication."
+  ],
+  qs: [
+    ["How does a database index work, and why can it slow down writes?", "An index keeps a sorted copy of selected columns with pointers to the rows, usually as a B-tree, so lookups take O(log n) instead of scanning the table. Every write must update the table and all its indexes, so more indexes mean slower writes and more storage. Index only what your queries need."],
+    ["B-tree vs LSM tree: how do they differ and when would you pick each?", "A B-tree updates sorted pages in place: predictable reads and range scans, higher write cost. An LSM tree appends writes to memory and merges sorted files later: very high write throughput, but reads may touch several files and compaction uses background I/O. Pick B-tree for read-heavy or transactional workloads, LSM for heavy writes, logs and time series."],
+    ["What is write amplification?", "The number of physical writes caused by one logical write. B-trees rewrite whole pages and log records; LSM trees rewrite data repeatedly during compaction across levels, which can multiply writes many times. It affects SSD wear, throughput and tail latency."],
+    ["What is a composite index and how does column order matter?", "An index over several columns, sorted by the first, then the second, and so on. It can serve queries that use a leftmost prefix of the columns. Put equality filters first and the range or sort column last, and match the order to your most important queries."],
+    ["What is a covering index?", "An index that holds every column a query needs, so the database answers from the index alone without reading table rows. It speeds up hot queries at the cost of a larger index."],
+    ["Why might the database ignore your index?", "The query returns a large share of rows (a scan is cheaper), the function or type conversion on the column prevents use of the index, the leading column of a composite index is missing, statistics are stale, or the table is tiny. Check the plan with EXPLAIN."],
+    ["SQL or NoSQL for a new product?", "Start with the data and access patterns. Relational databases suit structured data, joins, constraints and transactions. NoSQL suits massive scale, flexible schemas, simple key lookups or write-heavy workloads, but you give up joins and often strong transactions. Many systems use both."],
+    ["How do you model data in a NoSQL store like DynamoDB or Cassandra?", "Start from the queries, not the entities. Choose a partition key that spreads load and groups items read together, use a sort key for ordering, denormalise and duplicate data to avoid joins, and create extra tables or indexes for each additional access pattern."]
+  ]
+},
+
+cdn: {
+  def: "A content delivery network (CDN) is a worldwide network of edge servers that cache your content close to users, so static files and video are delivered fast and your origin servers see far less traffic. Edge locations answer cache hits directly and fetch from the origin only on a miss.",
+  terms: [
+    ["Edge / POP", "A CDN data centre close to users"],
+    ["Origin", "Your own server or storage that holds the original content"],
+    ["Pull vs push CDN", "Fetch on first request vs upload content in advance"],
+    ["Cache-Control / TTL", "Headers that say how long content may be cached"],
+    ["Cache key", "What identifies a cached object (URL, selected headers, query strings)"],
+    ["Origin shield", "A middle cache layer that protects the origin"],
+    ["HLS / DASH", "Video streamed in small chunks at several bitrates"],
+    ["Anycast / GeoDNS", "Ways to send each user to a nearby edge"]
+  ],
+  notes: [
+    "A CDN cuts latency (content is nearby), protects the origin (most requests never reach it) and absorbs spikes and attacks.",
+    "Pull CDNs fetch from the origin on a miss and are the default. Push CDNs suit rarely changing, large files you upload yourself.",
+    "Control caching with Cache-Control headers (max-age, s-maxage, stale-while-revalidate). Keep the cache key tight so one file is not cached many times.",
+    "Prefer versioned or hashed file names (app.4f2a.js) with very long TTLs, and use explicit purge only for emergencies. Invalidation is slow and costs money.",
+    "Video: encode into several bitrates and cut into short chunks (HLS or DASH). The player picks a quality per chunk based on bandwidth, which is adaptive bitrate streaming.",
+    "Private content uses signed URLs or cookies with an expiry. Add an origin shield so many edges share one request to the origin.",
+    "Dynamic content can still benefit: cache API responses for short times, use edge functions, and keep connections to the origin warm.",
+    "Track cache hit ratio, origin traffic, and time to first byte."
+  ],
+  qs: [
+    ["How does a CDN work?", "DNS or anycast routes the user to a nearby edge. On a hit the edge returns the cached object. On a miss it fetches from the origin (or a shield), stores it according to the cache headers, and returns it, so later users get it fast."],
+    ["Pull vs push CDN?", "Pull: the CDN fetches content from the origin on the first request; easy and efficient for most sites. Push: you upload content to the CDN in advance; useful for large, rarely changing files, but you manage uploads and cleanup."],
+    ["How do you invalidate or update cached content?", "Best is to avoid it: use versioned file names with long TTLs, so a new version is a new URL. For HTML or API responses use short TTLs or stale-while-revalidate. Use purge APIs only when needed, since propagation takes time."],
+    ["How would you stream video to millions of users?", "Transcode into several resolutions and bitrates, split into short chunks with a manifest (HLS or DASH), store in object storage, and serve through a CDN. The player switches quality per chunk based on network speed. Popular content stays hot at the edge; use pre-warming for big launches."],
+    ["What should you put in the cache key?", "The URL and only the headers or query parameters that truly change the response (for example language or device class). Ignoring tracking parameters and normalising case raises the hit ratio."],
+    ["How do you serve private or paid content through a CDN?", "Use signed URLs or signed cookies with a short expiry, restrict by token or IP when needed, and keep the origin private so it only accepts requests from the CDN."],
+    ["What is an origin shield?", "An extra caching tier between edges and the origin. Edges ask the shield, and only the shield goes to the origin, which collapses many simultaneous misses into one request and protects the origin."],
+    ["How do you measure and improve a CDN setup?", "Watch cache hit ratio, origin bandwidth and request rate, and time to first byte by region. Improve with longer TTLs, better cache keys, compression, an origin shield, and moving more content to static or cacheable forms."]
+  ]
+},
+
+uid: {
+  def: "Unique ID generation is how a distributed system creates identifiers that never collide across many servers, without a single bottleneck. Common choices are random UUIDs, time-ordered IDs such as Snowflake, ULID or UUIDv7, and database tickets or sequences; the right one depends on ordering, size and coordination needs.",
+  terms: [
+    ["UUID v4", "128-bit random id; no coordination, but unordered"],
+    ["UUID v7 / ULID", "Time-ordered 128-bit ids that sort by creation"],
+    ["Snowflake ID", "64-bit id: timestamp + machine id + sequence"],
+    ["Ticket server", "A central service or table that hands out numbers"],
+    ["Auto-increment", "A database counter; simple but one writer"],
+    ["Clock skew", "Servers' clocks disagree, or jump backwards"],
+    ["k-sortable", "Roughly ordered by time, good for indexes"],
+    ["Sequence number", "Counter that separates ids created in the same millisecond"]
+  ],
+  notes: [
+    "Requirements to clarify first: unique across machines, roughly time-sortable or not, size (64 or 128 bits), guessable or not, and expected rate.",
+    "Auto-increment or a ticket server is simple but is a single point of failure and a bottleneck; you can run several with different offsets, at the cost of weaker ordering.",
+    "UUID v4 needs no coordination, but its randomness scatters inserts across the index, which hurts write locality on large tables. 128 bits is also bigger than 64.",
+    "Snowflake: 41 bits of millisecond timestamp (about 69 years), 10 bits machine id, 12 bits sequence (about 4,096 ids per millisecond per machine). IDs are compact and sort by time.",
+    "Clock problems: if a clock moves backwards, a Snowflake generator can issue smaller or duplicate ids. Wait until the clock catches up for small skews, refuse and alert for large ones, and use NTP carefully.",
+    "UUID v7 and ULID give time-ordered ids with no machine id assignment, which suits modern databases and avoids index fragmentation.",
+    "Do not expose sequential ids publicly if guessing them is a risk (IDOR). Use random or encoded ids externally, with an internal ordered id."
+  ],
+  qs: [
+    ["Design a distributed unique ID generator.", "Clarify needs (time-sortable, 64-bit, rate). A Snowflake-style design: each machine composes a 64-bit id of 41-bit millisecond timestamp, 10-bit machine id and 12-bit sequence that resets each millisecond. Machine ids come from a coordination service at startup. Discuss clock skew, sequence overflow, and failure of a node."],
+    ["UUID vs Snowflake vs auto-increment?", "Auto-increment is simple but centralised. UUID v4 is coordination-free but large and random, hurting index locality. Snowflake is compact, time-sorted and fast, but needs machine ids and sound clocks. Pick by ordering, size and coordination needs; UUID v7 or ULID are good modern defaults."],
+    ["Why can random UUIDs hurt database performance?", "Random keys insert into random places in a B-tree index, causing page splits, poor cache locality and more disk I/O than sequential keys. Time-ordered ids (UUID v7, ULID, Snowflake) append near the end of the index."],
+    ["What happens if the clock moves backwards in a Snowflake generator?", "It could produce ids lower than or equal to ones already issued. Detect it by comparing with the last timestamp, wait for small differences, throw an error and alert for large ones, and keep the last timestamp persisted or in memory."],
+    ["How do you assign machine ids safely?", "Use a coordination service (ZooKeeper, etcd) or a database with leases to hand out unique worker ids at startup, and reclaim them when machines stop. Never let two live machines share one."],
+    ["What if you need ids to be strictly increasing across all machines?", "That needs a single sequencer or consensus, which limits throughput. Most systems accept roughly time-ordered ids, which are enough for sorting feeds, and use a single partition or log when strict order is truly required."],
+    ["How does a ticket server work, and what are its risks?", "A service (or database table) returns the next number, often in blocks so clients hand out ids locally. Risks are a single point of failure and a bottleneck; mitigate with several servers using different offsets and by caching ranges of ids."],
+    ["Should ids be sequential in public URLs?", "Usually not: sequential ids leak volume and make scraping or IDOR guessing easy. Use non-guessable public ids and always enforce authorisation."]
+  ]
+},
+
+api: {
+  def: "API design is shaping the contract between clients and services so it stays correct, fast and compatible as it grows. In interviews it covers resource modelling, pagination, versioning, idempotency, error handling, bulk operations and how long-running work is exposed.",
+  terms: [
+    ["Offset vs cursor pagination", "Page numbers vs an opaque position marker"],
+    ["Versioning", "Evolving an API without breaking existing clients"],
+    ["Idempotency key", "A client-chosen key that makes retries safe"],
+    ["Bulk / batch API", "One call that handles many items"],
+    ["PUT vs PATCH", "Replace a whole resource vs change part of it"],
+    ["202 Accepted", "Work was queued; check a status URL later"],
+    ["Rate limit headers", "Tell clients their quota and when to retry"],
+    ["Backward compatibility", "New server versions still work with old clients"]
+  ],
+  notes: [
+    "Model resources as nouns, use HTTP verbs correctly, return the right status codes, and keep error bodies consistent (code, message, details, request id).",
+    "Offset pagination (page, limit) is simple but slow on deep pages and unstable when data changes. Cursor (keyset) pagination uses the last seen key, stays fast and stable, and is the choice for feeds and large tables.",
+    "Version by URL (/v2) or header. Prefer additive changes (new optional fields), never repurpose fields, and deprecate with a timeline.",
+    "Idempotency keys: the client sends a unique key on POST; the server stores key plus result under a unique constraint and returns the same result on retry. Concurrent duplicates must be handled and keys expire.",
+    "Bulk APIs reduce round trips. Define partial failure clearly (per-item status, for example 207 Multi-Status), limit batch size, and make items idempotent.",
+    "Long-running operations return 202 with a status URL (or webhook) instead of holding the connection open.",
+    "Add filtering, sorting and field selection; return rate limit headers and 429 with Retry-After; support conditional requests (ETag) for caching."
+  ],
+  qs: [
+    ["Offset vs cursor pagination: when do you use each?", "Offset is fine for small, stable lists and when users need to jump to a page. Cursor pagination fits large or fast-changing data: it stays fast (indexed seek), doesn't skip or repeat rows when data changes, and works well for infinite scroll. The cost is no random page access."],
+    ["How do you version an API?", "Put the version in the URL (/v1/orders) or a header, keep changes additive within a version, publish a deprecation policy, monitor usage of old versions, and support them until traffic drops. Avoid breaking changes: removing fields, changing types or meanings."],
+    ["How would you design an idempotent payment or order API?", "Require an Idempotency-Key header. Store the key with the request fingerprint and the response in a table with a unique constraint. On a retry return the stored response; if a request with the same key is still running, return 409 or wait. Reject the same key with a different body, and expire keys after a period."],
+    ["How do you design a bulk API?", "Accept an array with a size limit, process items independently or atomically (document which), and return a per-item result with a status and error. Make it idempotent, consider async processing with 202 for big batches, and apply rate limits per item as well as per request."],
+    ["PUT vs PATCH vs POST?", "POST creates (or triggers an action) and is not idempotent. PUT replaces the full resource and is idempotent. PATCH applies a partial change and may or may not be idempotent depending on the operation."],
+    ["How do you handle long-running operations in an API?", "Return 202 Accepted with a Location header pointing to a status resource, process in the background with a queue, and let clients poll the status or receive a webhook or event when it finishes."],
+    ["What makes a good error response?", "The right HTTP status, a stable machine-readable error code, a human message, field-level details for validation errors, and a request id for support. Never leak stack traces or internal details."],
+    ["How do you protect an API from abuse and overload?", "Authenticate every call, rate limit per key and per endpoint with 429 and Retry-After, validate and cap payload sizes, paginate everything, use timeouts and circuit breakers downstream, and cache safe GET responses with ETags."]
+  ]
+},
+
+prob: {
+  def: "Probabilistic data structures trade a small, controlled error for huge savings in memory and time. A Bloom filter answers 'is this item in the set?' (never a false negative, sometimes a false positive), HyperLogLog estimates how many distinct items were seen, and a count-min sketch estimates how often each item appeared.",
+  terms: [
+    ["Bloom filter", "Bit array plus hash functions for membership checks"],
+    ["False positive", "Says 'maybe present' for something that is not"],
+    ["HyperLogLog", "Estimates distinct count in about 12 KB with roughly 1% error"],
+    ["Cardinality", "The number of distinct elements"],
+    ["Count-min sketch", "Counters in several hashed rows to estimate frequency"],
+    ["Heavy hitters / top-K", "The most frequent items in a stream"],
+    ["Mergeable sketch", "Sketches from different servers or days can be combined"],
+    ["Cuckoo filter", "A Bloom alternative that supports deletes"]
+  ],
+  notes: [
+    "Bloom filter: add an item by setting k bits chosen by k hashes; to check, test those bits. If any bit is 0 the item is definitely absent; if all are 1 it is probably present.",
+    "Size a Bloom filter for the expected item count and false-positive rate; about 10 bits per item gives roughly 1% false positives. It cannot delete items (use a counting or cuckoo filter if you need that).",
+    "Use a Bloom filter in front of an expensive lookup: 'is this username taken?', 'have we crawled this URL?', 'does this row exist in this SSTable?', protecting a database from lookups for missing keys.",
+    "HyperLogLog counts distinct items (unique visitors, unique viewers) in a fixed small memory (Redis uses about 12 KB per key, around 0.8% standard error) and sketches can be merged, for example daily into weekly.",
+    "Count-min sketch counts frequency, never underestimates, and can overestimate because of collisions. Pair it with a small heap for top-K trending items.",
+    "These structures give approximate answers, so use them when exactness is not required, and confirm positives against the source of truth when it matters.",
+    "Choose by question: membership means Bloom, how many distinct means HyperLogLog, how often means count-min."
+  ],
+  qs: [
+    ["How would you check whether a username already exists among a billion users?", "Put a Bloom filter in front of the database. If the filter says no, the name is free (no false negatives), so you skip the query. If it says maybe, check the database to confirm. This removes most lookups while keeping answers correct, and costs roughly 1 to 1.5 GB for a billion names at 1% false positives."],
+    ["How do you count unique viewers of a video at massive scale?", "Use HyperLogLog: add each viewer id to a per-video sketch (Redis PFADD) and read the estimate (PFCOUNT) in about 12 KB per video with around 1% error. Sketches can be merged (PFMERGE) to get weekly or global unique counts. If you need exact counts, you need far more memory or a database."],
+    ["How does a Bloom filter work, and can it return false negatives?", "It is a bit array and k hash functions. Adding sets k bits; checking tests those bits. It never gives a false negative, but it can give a false positive when other items set the same bits. Plain Bloom filters do not support deletion."],
+    ["How would you find the top 10 trending hashtags in a stream?", "Use a count-min sketch to estimate each hashtag's frequency in a sliding window and keep a min-heap of the current top K candidates. Merge sketches from several nodes, or use time-bucketed counters. For exactness at smaller scale, use sharded counters and periodic aggregation."],
+    ["What are the trade-offs of these structures?", "Huge memory and speed savings versus approximate answers. Bloom filters have false positives, HyperLogLog has a small relative error and cannot list members, count-min overestimates. Choose them when approximate is acceptable or when they only guard an exact check."],
+    ["How do you choose the size of a Bloom filter?", "Pick the expected number of items n and a target false-positive rate p, then compute the bit-array size m and number of hash functions k from standard formulas (about 10 bits per item and 7 hashes for 1%). If n grows beyond the plan, the error rate rises, so use scalable Bloom filters or rebuild."],
+    ["Where do databases use Bloom filters internally?", "LSM-tree stores such as Cassandra, RocksDB and HBase keep a Bloom filter per file so a read can skip files that definitely do not contain the key, which avoids disk reads for missing keys."],
+    ["Can you delete from a Bloom filter?", "Not from a standard one, since bits may be shared. Use a counting Bloom filter (counters instead of bits), a cuckoo filter, or rebuild the filter periodically from the source of truth."]
+  ]
+},
+
+txn: {
+  def: "A transaction groups several database operations into one all-or-nothing unit. ACID describes its guarantees: atomicity, consistency, isolation and durability. Isolation levels decide how much concurrent transactions can see of each other, and locking (optimistic or pessimistic) is how conflicts are prevented or detected.",
+  terms: [
+    ["ACID", "Atomic, Consistent, Isolated, Durable"],
+    ["Dirty read", "Reading another transaction's uncommitted data"],
+    ["Non-repeatable read", "Reading the same row twice and getting different values"],
+    ["Phantom read", "A repeated query returns new rows another transaction added"],
+    ["Snapshot isolation / MVCC", "Each transaction reads a consistent snapshot of the data"],
+    ["Write skew", "Two transactions each read overlapping data and write different rows, breaking a rule"],
+    ["Optimistic locking", "Assume no conflict; check a version at commit"],
+    ["Pessimistic locking", "Lock the data first (SELECT ... FOR UPDATE)"]
+  ],
+  notes: [
+    "Atomicity: all or nothing (rollback on failure). Consistency: constraints hold before and after. Isolation: concurrent transactions do not see each other's partial work. Durability: committed data survives crashes (write-ahead log).",
+    "Isolation levels, weakest to strongest: read uncommitted, read committed (no dirty reads), repeatable read (no non-repeatable reads), serializable (no phantoms or other anomalies). Higher isolation means fewer anomalies but more locking or retries.",
+    "Most databases default to read committed (PostgreSQL, Oracle, SQL Server) or repeatable read (MySQL InnoDB). Know your database's default and what it actually guarantees.",
+    "MVCC keeps several versions of rows so readers do not block writers. Snapshot isolation prevents most anomalies but still allows write skew, which needs serializable isolation or explicit locks.",
+    "Pessimistic locking (SELECT ... FOR UPDATE) is safest under high contention but can block and deadlock. Optimistic locking uses a version column and retries on conflict, which works best when conflicts are rare.",
+    "Keep transactions short, access rows in a consistent order to avoid deadlocks, and set timeouts.",
+    "Across services you cannot use one ACID transaction: use sagas, the outbox pattern and idempotent steps."
+  ],
+  qs: [
+    ["What does ACID mean?", "Atomicity: a transaction fully succeeds or fully rolls back. Consistency: it moves the database from one valid state to another, respecting constraints. Isolation: concurrent transactions behave as if run in some order. Durability: once committed, data survives a crash, typically via a write-ahead log."],
+    ["Explain the isolation levels and the anomalies they prevent.", "Read uncommitted allows dirty reads. Read committed blocks dirty reads. Repeatable read also blocks non-repeatable reads (and in many databases phantoms through snapshots). Serializable blocks all anomalies, including phantoms and write skew, at the cost of locking or aborts."],
+    ["What are dirty, non-repeatable and phantom reads?", "Dirty: reading uncommitted data that may be rolled back. Non-repeatable: the same row read twice gives different values because another transaction committed a change. Phantom: the same query returns a different set of rows because another transaction inserted or deleted matching rows."],
+    ["Optimistic vs pessimistic locking: when do you use each?", "Pessimistic locks the rows up front (SELECT FOR UPDATE), which is safe when conflicts are frequent, like a hot inventory row. Optimistic reads freely and checks a version column on update, retrying on conflict, which scales better when conflicts are rare. Choose by contention."],
+    ["How would you stop two users booking the last seat?", "Make the update conditional and atomic: UPDATE seats SET status='booked' WHERE id=? AND status='free' and check the affected row count, or use SELECT FOR UPDATE inside a transaction, or a unique constraint on (seat, show). For high contention, serialise through a queue or a short seat hold with expiry."],
+    ["What is MVCC?", "Multi-version concurrency control keeps multiple versions of a row, so a reader sees a consistent snapshot while writers create new versions. Readers do not block writers and vice versa; old versions are cleaned up later (vacuum)."],
+    ["What is write skew and how do you prevent it?", "Two transactions read the same condition (for example, at least one doctor on call), then each updates a different row, and together they break the rule. Snapshot isolation allows it. Prevent it with serializable isolation, locking the rows that formed the decision, or a constraint."],
+    ["How do you handle transactions across microservices?", "You cannot rely on one ACID transaction. Use sagas with compensating actions, the outbox pattern for reliable events, idempotent consumers, and design each step to be retried safely."]
+  ]
+}
 };
+// Additional topics (notes only, no video yet): shown in the sidebar under ADDITIONAL TOPICS
+window.__EXTRA=[
+  {id:'est',title:'Back-of-envelope estimation',sub:'QPS, storage and bandwidth math'},
+  {id:'idx',title:'Indexing & storage engines',sub:'B-tree vs LSM tree, SQL vs NoSQL'},
+  {id:'cdn',title:'CDN & edge delivery',sub:'Static content and video, worldwide'},
+  {id:'uid',title:'Unique ID generation',sub:'Snowflake, UUID, ticket servers'},
+  {id:'api',title:'API design',sub:'Pagination, versioning, idempotency, bulk'},
+  {id:'prob',title:'Probabilistic structures',sub:'Bloom filter, HyperLogLog, count-min'},
+  {id:'txn',title:'Transactions & isolation',sub:'ACID, anomalies, optimistic vs pessimistic'}
+];
 window.dispatchEvent(new Event('notes-ready'));

@@ -482,3 +482,13 @@ html[data-theme="dark"] .wrap{background:none}
 .tip span{overflow:hidden;text-overflow:ellipsis}
 .tip[hidden]{display:none}
 .tl{padding-top:22px}
+
+/* Additional topics: notes-only pages from the sidebar */
+.tabs.extra b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wrap[data-view="topic"] .welcome,.wrap[data-view="topic"] .stats,.wrap[data-view="topic"] .ovgrid,.wrap[data-view="topic"] .bar2,.wrap[data-view="topic"] .main>.player,.wrap[data-view="topic"] .main>.side{display:none}
+.wrap[data-view="topic"] .notes{display:grid;grid-row:1;padding-top:6px}
+.wrap[data-view="topic"] #tabs button.on{background:transparent;color:var(--ink);box-shadow:none}
+.wrap[data-view="topic"] #tabs button.on b{font-weight:500}
+.wrap[data-view="topic"] #tabs button.on i{background:var(--soft);color:var(--muted)}
+html[data-theme="dark"] .tabs.extra button.on{background:#e0583a}
+@media (min-width:1081px){.wrap[data-view="topic"]{min-height:100vh;padding-block:24px 56px;align-content:start}}
