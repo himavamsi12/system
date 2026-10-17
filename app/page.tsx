@@ -13,6 +13,7 @@ export const metadata: Metadata = {
 const Page = () => (
   <>
     <div dangerouslySetInnerHTML={{ __html: html }} />
+    <Script src="/legacy/notes.js" strategy="afterInteractive" />
     <Script src="/legacy/videos.js" strategy="afterInteractive" />
   </>
 );

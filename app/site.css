@@ -22,3 +22,20 @@ img{max-width:100%}
 .sitenav nav::-webkit-scrollbar{display:none}
 .sitenav nav a{white-space:nowrap;min-height:40px;display:flex;align-items:center}
 }
+
+/* theme: logo swap + toggle */
+.logo-d{display:none}
+html[data-theme="dark"] .logo-l{display:none}
+html[data-theme="dark"] .logo-d{display:block}
+html[data-theme="dark"]{color-scheme:dark}
+.tt{width:40px;height:40px;border-radius:50%;border:1px solid var(--line,#e7e8ec);background:var(--panel,#fff);color:var(--ink,#0f1115);display:grid;place-items:center;cursor:pointer;padding:0;order:3;flex:none}
+.tt span{display:grid}
+.tt svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tt .i-moon,html[data-theme="dark"] .tt .i-sun{display:none}
+html[data-theme="dark"] .tt .i-moon{display:grid}
+.tt:focus-visible{outline:2px solid var(--accent,#d9531e);outline-offset:2px}
+.sitenav .brand img{display:block;height:32px;width:auto}
+.sitenav .brand .logo-d{display:none}
+html[data-theme="dark"] .sitenav .brand .logo-l{display:none}
+html[data-theme="dark"] .sitenav .brand .logo-d{display:block}
+@media (max-width:640px){.sitenav .tt{margin-left:auto;order:0}.sitenav nav{order:5}}

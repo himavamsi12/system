@@ -3,6 +3,16 @@
 const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const NS='http://www.w3.org/2000/svg';
 const $=id=>document.getElementById(id);
+const IC={
+play:'<path d="M7 4.8v14.4a.8.8 0 0 0 1.2.7l11.5-7.2a.8.8 0 0 0 0-1.4L8.2 4.1A.8.8 0 0 0 7 4.8z" fill="currentColor" stroke="none"/>',
+pause:'<rect x="6" y="4.5" width="4" height="15" rx="1.2" fill="currentColor" stroke="none"/><rect x="14" y="4.5" width="4" height="15" rx="1.2" fill="currentColor" stroke="none"/>',
+back:'<path d="M19 5.5v13a.7.7 0 0 1-1.1.6L9 13a1 1 0 0 1 0-1.7l8.9-6.4a.7.7 0 0 1 1.1.6z"/><path d="M5 5v14"/>',
+next:'<path d="M5 5.5v13a.7.7 0 0 0 1.1.6L15 13a1 1 0 0 0 0-1.7L6.1 4.9A.7.7 0 0 0 5 5.5z"/><path d="M19 5v14"/>',
+restart:'<path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1L3.5 8.5"/><path d="M3.5 3.5v5h5"/>',
+speed:'<path d="M12 14.5l4-4.5"/><path d="M3.3 17A9.5 9.5 0 1 1 20.7 17"/>',
+volOn:'<path d="M11 5 6.5 9H3.5v6h3L11 19z"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6"/><path d="M18.3 6.3a8 8 0 0 1 0 11.4"/>',
+volOff:'<path d="M11 5 6.5 9H3.5v6h3L11 19z"/><path d="m16 9.5 5 5M21 9.5l-5 5"/>'};
+const lbl=(el,ic,t)=>{if(!el)return;el.innerHTML='<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">'+IC[ic]+'</svg><span>'+t+'</span>'};
 function E(t,a,p,txt){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;if(p)p.appendChild(e);return e}
 const TAGS={start:'START',problem:'PROBLEM',fix:'FIX',idea:'IDEA',question:'QUESTION',result:'RESULT',next:'WHAT’S NEXT',summary:'SUMMARY'};
 
@@ -55,7 +65,7 @@ const EPS=[
   {tag:'next',title:'The next bottleneck: the database',set3:{S1:[560,100],S2:[700,170],S3:[560,240],S4:[700,310],S5:[560,380]},cap:'All these servers still read and write one database. As we keep adding servers, that database fills up to 90% load. Scaling it is harder because it holds the data. That is Episode 3.',
    set:{sess:[845,345,1,0],clock:[370,390,1,0],db:[845,450,1,1]},shake:['db'],flows:[['users','LB','a',150],['LB',['S1','S2','S3','S4','S5'],'a',150],['S2','db','u',260],['S4','db','u',260],['S5','db','u',300]]},
   {tag:'summary',title:'What to remember',cap:'Vertical scaling makes one machine bigger: simple, but it has a ceiling and is a single point of failure. Horizontal scaling adds machines behind a load balancer and needs stateless servers, but it can keep growing.',
-   set:{sum:[480,295,1,1]},dim:['sum']}
+   set:{sum:[480,316,1,1]},dim:['sum']}
  ]},
 {id:'cache',o3:{msg:[812,160]},name:'Episode 2 · Caching',sub:'Cache-aside, invalidation, stampedes, LRU',
  actors:[
@@ -98,7 +108,7 @@ const EPS=[
   {tag:'fix',title:'Fix: evict the least recently used',cap:'An eviction policy decides who leaves. With LRU, least recently used, the menu nobody has opened for the longest time, the old cafe, is removed. The new menu goes in at the top as the most recent.',
    set:{k5:[620,200,1,1],k1:[620,236,1,1],k2:[620,272,1,1],k3:[620,308,1,1],k4:[800,420,.9,0]}},
   {tag:'summary',title:'What to remember',cap:'Cache-aside for read-heavy data, delete keys on writes, protect against stampedes with a lock and jitter, and let LRU evict cold keys. Never cache values that must be exactly right at that moment.',
-   set:{sum:[480,290,1,1]},dim:['sum']}
+   set:{sum:[480,316,1,1]},dim:['sum']}
  ]},
 {id:'db',o3:{msg:[480,450]},name:'Episode 3 · Database scaling',sub:'Replicas, lag, failover, sharding',
  actors:[
@@ -133,7 +143,7 @@ const EPS=[
   {tag:'problem',title:'Problem: adding a shard moves data',cap:'If shards are picked with hash % N, going from 3 to 4 shards changes the answer for about 75% of the data, which then has to be copied between databases. Consistent hashing moves only about 25%.',
    set:{bars:[400,470,1,1]},flows:[['app','router','a',260]]},
   {tag:'summary',title:'What to remember',cap:'Add indexes and a cache, scale up, add read replicas, handle lag and failover, then shard by the key your queries use, with consistent hashing. Go to the next step only when the previous one is not enough.',
-   set:{sum:[480,290,1,1]},dim:['sum']}
+   set:{sum:[480,316,1,1]},dim:['sum']}
  ]}
 ];
 
@@ -160,7 +170,7 @@ EPS.push(
   {tag:'problem',title:"Problem: “where's my rider?” every 2 s",cap:"To show the rider moving, the app could ask every 2 seconds. Most answers are “no change”. That drains Priya's battery and adds millions of useless requests across all users.",txt:{msg:'polling every 2 s…'},lcls:{msg:'bad'},flows:[['app','gw','a',260],['gw','app','b',520]]},
   {tag:'fix',title:'Fix: one WebSocket that stays open',cap:"Instead, the app opens one WebSocket and keeps it open. The server pushes the rider's position every 4 seconds, only when it changes. One connection replaces thousands of requests.",set:{ws:[540,450,1,1]},txt:{msg:'one open line, server pushes'},lcls:{msg:'ok'},flows:[['ws','app','g',1000]]},
   {tag:'idea',title:'A partner calls us: webhooks',cap:"When the UPI payment succeeds, Razorpay calls a URL on our side, a webhook, to tell us. We verify its signature before trusting it, then mark the order as paid.",set:{rzp:[900,130,1,1]},txt:{msg:'webhook: payment.captured ✓'},lcls:{msg:'ok'},seq:[['rzp','svc','y',0,1.1]]},
-  {tag:'summary',title:'What to remember',cap:"DNS finds the server, TLS secures the line, the CDN serves files nearby, REST and gRPC carry requests, idempotency keys make retries safe, and WebSockets and webhooks handle real-time and partner events.",set:{sum:[480,290,1,1]},dim:['sum']}
+  {tag:'summary',title:'What to remember',cap:"DNS finds the server, TLS secures the line, the CDN serves files nearby, REST and gRPC carry requests, idempotency keys make retries safe, and WebSockets and webhooks handle real-time and partner events.",set:{sum:[480,316,1,1]},dim:['sum']}
  ]},
 {id:'lb',n:3,title:'Load balancing',sub:'Algorithms, health checks, L4 vs L7, redundancy',o3:{},
  actors:[
@@ -177,7 +187,7 @@ EPS.push(
   {tag:'idea',title:'Layer 7: route by URL',cap:"A layer 7 balancer reads each request: order calls go to order servers, menu calls go to menu servers, so each pool scales on its own. A layer 4 balancer only sees addresses and ports, which is faster for raw connections.",set:{S3:[620,440,1,0],S4:[620,440,1,1]},cls:{S3:''},txt:{msg:'/orders → orders · /menu → menu'},lcls:{msg:'acc'},flows:[['users','LB','a',220],['LB',['S1','S2'],'a',300],['LB','S4','u',420]]},
   {tag:'problem',title:'Problem: the balancer is a single point',cap:"Now everything depends on one load balancer. If that one machine dies, no request reaches any server, no matter how many servers we have.",cls:{LB:'dead'},txt:{msg:'the balancer itself crashed'},lcls:{msg:'bad'},flows:[['users','LB','b',260]]},
   {tag:'fix',title:'Fix: a standby or managed balancer',cap:"Run balancers in pairs. A standby watches the active one and takes over its IP address within seconds. Cloud balancers such as AWS ALB do this for you across availability zones.",set:{LB2:[380,455,1,1]},txt:{msg:'standby took over the IP'},lcls:{msg:'ok'},flows:[['users','LB2','a',220],['LB2',['S1','S2','S4'],'a',220]]},
-  {tag:'summary',title:'What to remember',cap:"Pick servers with least connections, remove sick ones with health checks, route by URL at layer 7, and never let the balancer itself be a single point of failure.",set:{sum:[480,290,1,1]},dim:['sum']}
+  {tag:'summary',title:'What to remember',cap:"Pick servers with least connections, remove sick ones with health checks, route by URL at layer 7, and never let the balancer itself be a single point of failure.",set:{sum:[480,316,1,1]},dim:['sum']}
  ]},
 {id:'cons',n:6,title:'Consistency & sagas',sub:'Quorums, split brain, sagas, idempotency',o3:{orch:[640,150],msg:[760,505]},
  actors:[
@@ -200,7 +210,7 @@ EPS.push(
   {tag:'problem',title:'Problem: step 3 fails after paying',cap:"The restaurant's tablet is offline and never accepts. But Priya has already been charged ₹349. We can't simply roll back, because the payment happened in a different system.",cls:{n3:'dead'},lab:{n3:['3 · Restaurant accepts','no reply in 3 min']},seq:[['n1','n2','g',0],['n2','n3','b',.9]]},
   {tag:'fix',title:'Fix: a saga with undo steps',cap:"A saga gives every step an undo action. The workflow runs them in reverse: refund the ₹349, then cancel the order and tell Priya. The workflow engine records progress, so a crash can't leave it half done.",set:{c2:[350,460,1,1],c1:[130,460,1,1]},seq:[['n3','c2','b',0],['c2','c1','b',1]]},
   {tag:'fix',title:'Every step must be safe to repeat',cap:"If a server crashes mid-step, the workflow retries it. So every step is idempotent: charging twice with the same order ID still charges once, and refunding twice still refunds once.",set:{msg:[820,120,1,1]},txt:{msg:'every step safe to retry'},lcls:{msg:'ok'},seq:[['orch','n2','y',0],['orch','n2','y',.8],['n2','orch','g',1.7]]},
-  {tag:'summary',title:'What to remember',cap:"Quorums keep copies in step, majorities prevent split brain, and sagas with idempotent steps and undo actions keep many services consistent without one big transaction.",set:{sum:[480,290,1,1]},dim:['sum']}
+  {tag:'summary',title:'What to remember',cap:"Quorums keep copies in step, majorities prevent split brain, and sagas with idempotent steps and undo actions keep many services consistent without one big transaction.",set:{sum:[480,316,1,1]},dim:['sum']}
  ]},
 {id:'queue',n:7,title:'Queues & Kafka',sub:'Async events, outbox, DLQ, absorbing spikes',o3:{},
  actors:[
@@ -219,7 +229,7 @@ EPS.push(
   {tag:'problem',title:'Problem: one broken event blocks the line',cap:"A malformed event makes the analytics consumer crash every time it reads it. It retries forever, and every event queued behind it is stuck.",set:{pg:[110,450,1,0],relay:[330,450,1,0],dlq:[440,455,1,1]},txt:{msg:'one bad event keeps failing'},lcls:{msg:'bad'},shake:['ana'],seq:[['kafka','ana','b',0],['kafka','ana','b',1],['kafka','ana','b',2]]},
   {tag:'fix',title:'Fix: retries, then a dead-letter queue',cap:"Retry a few times with growing waits, then move the event to a dead-letter topic and carry on. An engineer is alerted to inspect it. Consumers are idempotent too, because Kafka may deliver an event twice.",txt:{msg:'3 tries → dead-letter topic'},lcls:{msg:'ok'},seq:[['kafka','ana','b',0],['ana','dlq','b',1]],flows:[['kafka',['notify','disp'],'g',400]]},
   {tag:'result',title:'Spikes are absorbed',cap:"On IPL final night orders jump tenfold. The topic grows, consumers work through it at a steady pace, and autoscaling adds workers when the backlog grows. Nothing crashes and nothing is lost.",lab:{order:['Order service','IPL final: 10× orders']},meter:{kafka:85},txt:{msg:'the queue absorbs the spike'},lcls:{msg:'ok'},flows:[['order','kafka','a',90],['kafka',['notify','disp','ana'],'g',260]]},
-  {tag:'summary',title:'What to remember',cap:"Answer the user fast and push the rest through a queue. Use an outbox so events are never lost, idempotent consumers because duplicates happen, and a dead-letter queue for messages that keep failing.",set:{sum:[480,290,1,1]},dim:['sum']}
+  {tag:'summary',title:'What to remember',cap:"Answer the user fast and push the rest through a queue. Use an outbox so events are never lost, idempotent consumers because duplicates happen, and a dead-letter queue for messages that keep failing.",set:{sum:[480,316,1,1]},dim:['sum']}
  ]},
 {id:'arch',n:8,title:'Architecture',sub:'Monolith vs microservices, gateway, events',o3:{},
  actors:[
@@ -237,7 +247,7 @@ EPS.push(
   {tag:'problem',title:'Problem: one slow service slows the rest',cap:"The payment service becomes slow. The order service waits on it, its threads fill up, and soon checkout is slow for everyone. In a distributed system, one sick service can spread.",lab:{sP:['Payment service','responding in 30 s']},txt:{msg:'checkout waits on payments'},lcls:{msg:'bad'},shake:['sP'],seq:[['gw','sO','a',0],['sO','sP','b',.8,2.5]]},
   {tag:'fix',title:'Fix: timeouts, fallbacks, events',cap:"Every call gets a strict timeout and a fallback, such as “payment pending, we'll confirm shortly”. Anything that doesn't need an instant answer goes through events. Episode 9 covers these patterns.",lab:{sP:['Payment service','300 ms timeout + fallback']},txt:{msg:'timeout + fallback → keep going'},lcls:{msg:'ok'},seq:[['gw','sO','a',0],['sO','sP','a',.8],['sO','gw','g',1.6]]},
   {tag:'result',title:'Each service scales on its own',cap:"At dinner the order service runs 40 copies while the user service needs only 3. With a monolith, everything would have to scale together and we would pay for it all.",set:{sO:[800,280,1.3,1],sU:[620,120,.8,1]},lab:{sO:['Order service','×40 pods at dinner'],sU:['User service','×3 pods']},txt:{msg:'scale only what is busy'},flows:[['users','gw','a',180],['gw',['sO','sO','sO','sU'],'a',180]]},
-  {tag:'summary',title:'What to remember',cap:"Start simple with a monolith. Split by business area when teams and scale demand it, give each service its own data, put a gateway in front, and protect every call so one slow service can't drag down the rest.",set:{sum:[480,290,1,1]},dim:['sum']}
+  {tag:'summary',title:'What to remember',cap:"Start simple with a monolith. Split by business area when teams and scale demand it, give each service its own data, put a gateway in front, and protect every call so one slow service can't drag down the rest.",set:{sum:[480,316,1,1]},dim:['sum']}
  ]},
 {id:'res',n:9,title:'Resilience',sub:'Rate limits, shedding, circuit breakers, retries',o3:{},
  actors:[
@@ -255,7 +265,7 @@ EPS.push(
   {tag:'result',title:'Half-open: test, then recover',cap:"After 30 seconds the breaker lets one test payment through to Razorpay. It succeeds, so the breaker closes and traffic returns to the primary gateway.",cls:{rzp:''},lab:{pr:['Payment router','half-open → closed']},txt:{msg:'1 test call succeeded'},seq:[['pr','rzp','y',0],['rzp','pr','g',1]],flows:[['order','pr','a',300]]},
   {tag:'problem',title:'Problem: retries make it worse',cap:"When something slows down, every layer retries. Three retries at each of four layers turns one tap into 81 calls on the deepest service, and the service that was struggling collapses.",txt:{msg:'3 retries × 4 layers = 81 calls'},lcls:{msg:'bad'},shake:['pr'],flows:[['order','pr','b',70]]},
   {tag:'fix',title:'Fix: back off, add jitter, cap retries',cap:"Retry at one layer only, wait longer each time (100, 200, 400 ms) with random jitter so clients don't retry in sync, and cap retries at about 10% extra traffic. Only retry calls that are safe to repeat.",txt:{msg:'backoff + jitter + retry budget'},lcls:{msg:'ok'},flows:[['order','pr','a',450],['pr','rzp','g',450]]},
-  {tag:'summary',title:'What to remember',cap:"Limit abusive traffic at the edge, shed extras first, open circuit breakers on failing dependencies, and retry gently with backoff, jitter and a budget.",set:{sum:[480,290,1,1]},dim:['sum']}
+  {tag:'summary',title:'What to remember',cap:"Limit abusive traffic at the edge, shed extras first, open circuit breakers on failing dependencies, and retry gently with backoff, jitter and a budget.",set:{sum:[480,316,1,1]},dim:['sum']}
  ]},
 {id:'store',n:10,title:'Storage, search & geo',sub:'S3 uploads, CDN, search index, nearby riders',o3:{},
  actors:[
@@ -275,7 +285,7 @@ EPS.push(
   {tag:'fix',title:'Fix: a search index',cap:"A search engine like Elasticsearch keeps an inverted index: for each word, the list of dishes containing it. Fuzzy matching handles the typo, and changes stream in from Postgres within seconds.",set:{cdc:[370,300,1,1],es:[600,300,1,1]},meter:{pg:30},txt:{msg:'“biryani” → dishes 4, 9, 22, 31'},lcls:{msg:'ok'},flows:[['pg','cdc','a',900],['cdc','es','a',900]],seq:[['api','es','a',0],['es','api','g',.9]]},
   {tag:'problem',title:'Problem: who is the nearest rider?',cap:"To assign Priya's order, dispatch needs the closest free rider. Checking the distance to all 160,000 riders for every order, hundreds of times a second, is far too slow.",set:{pg:[140,300,1,0],cdc:[370,300,1,0],es:[600,300,1,0],api:[830,300,1,0],riders:[140,300,1,1],disp:[830,300,1,1]},meter:{disp:97},shake:['disp'],txt:{msg:'160,000 distance checks per order'},lcls:{msg:'bad'}},
   {tag:'fix',title:'Fix: split the map into cells',cap:"The map is divided into small hexagon cells (H3). Each rider is stored under their cell in Redis. Dispatch looks only in the restaurant's cell and the 6 around it: a few dozen riders instead of 160,000.",set:{loc:[370,300,1,1],geo:[600,300,1,1]},meter:{disp:25},txt:{msg:'look in 7 nearby hexagons only'},lcls:{msg:'ok'},flows:[['riders','loc','u',300],['loc','geo','u',300]],seq:[['disp','geo','a',0],['geo','disp','g',.9]]},
-  {tag:'summary',title:'What to remember',cap:"Put files in object storage and serve them through a CDN, search with an inverted index fed by change capture, and find nearby things with geo cells instead of checking every distance.",set:{sum:[480,290,1,1]},dim:['sum']}
+  {tag:'summary',title:'What to remember',cap:"Put files in object storage and serve them through a CDN, search with an inverted index fed by change capture, and find nearby things with geo cells instead of checking every distance.",set:{sum:[480,316,1,1]},dim:['sum']}
  ]},
 {id:'sec',n:11,title:'Security',sub:'OTP login, JWT, ownership, payments, webhooks',o3:{},
  actors:[
@@ -294,7 +304,7 @@ EPS.push(
   {tag:'fix',title:'Card details never touch our servers',cap:"Payment happens inside Razorpay's checkout. Card numbers and UPI details go straight to them, and we only receive a payment ID. We never store card data, which keeps us out of the riskiest compliance scope.",set:{gw:[560,350,1,0],order:[790,350,1,0],rzp:[380,470,1,1],pay:[640,470,1,1]},lab:{order:['Order service','checks ownership']},txt:{msg:'card data goes only to Razorpay'},seq:[['app','rzp','a',0,1.2]]},
   {tag:'fix',title:'Verify every webhook',cap:"Razorpay signs each webhook with a shared secret. The payment service recomputes the signature with the secret from its vault and rejects anything that doesn't match, so nobody can fake a “payment succeeded” message.",lab:{pay:['Payment service','signature ✓ → paid']},txt:{msg:'webhook signature (HMAC) ✓'},seq:[['rzp','pay','y',0,1]]},
   {tag:'fix',title:'The edge firewall absorbs attacks',cap:"Bots try SQL injection strings and flood the login page. The web application firewall and CDN at the edge block known attack patterns and absorb floods before they ever reach our servers.",set:{rzp:[380,470,1,0],pay:[640,470,1,0],bad:[130,460,1,1]},txt:{msg:'WAF blocks floods and injections'},flows:[['bad','waf','b',110],['waf','bad','b',300],['app','waf','a',700]]},
-  {tag:'summary',title:'What to remember',cap:"Short-lived signed tokens prove who someone is, ownership checks decide what they can see, payment data stays with the payment provider, webhooks are verified, and the edge firewall stops attacks early.",set:{sum:[480,290,1,1]},dim:['sum']}
+  {tag:'summary',title:'What to remember',cap:"Short-lived signed tokens prove who someone is, ownership checks decide what they can see, payment data stays with the payment provider, webhooks are verified, and the edge firewall stops attacks early.",set:{sum:[480,316,1,1]},dim:['sum']}
  ]},
 {id:'obs',n:12,title:'Observability & deploys',sub:'Metrics, logs, traces, alerts, canary releases',o3:{},
  actors:[
@@ -313,7 +323,7 @@ EPS.push(
   {tag:'idea',title:'Ship new code to 5% first',cap:"Most outages come from deploys. So version 42 of the order service goes to only 5% of users, while 95% stay on version 41. The rollout tool compares their error rates live.",set:{sA:[140,190,1,0],sB:[260,340,1,0],sC:[140,470,1,0],col:[450,330,1,0],store:[680,330,1,0],graf:[860,180,1,0],pd:[860,450,1,0],users:[140,300,1,1],argo:[400,300,1,1],v41:[680,160,1,1],v42:[680,440,1,1],msg:[400,140,1,1]},txt:{msg:'new version → 5% of users'},lcls:{msg:'acc'},flows:[['users','argo','a',200],['argo',['v41','v41','v41','v41','v41','v41','v41','v41','v41','v42'],'a',150]]},
   {tag:'problem',title:'Problem: the new version has a bug',cap:"Version 42 has a bug that breaks UPI payments for some users. Its error rate jumps to 4.2% while version 41 stays at 0.3%.",meter:{v42:95},lab:{v42:['Order v42','errors 4.2%']},shake:['v42'],txt:{msg:'v42 errors 4.2% vs v41 0.3%'},lcls:{msg:'bad'},flows:[['users','argo','a',200],['argo',['v41','v41','v41','v41','v42'],'a',150]]},
   {tag:'fix',title:'Fix: automatic rollback',cap:"The rollout tool sees the difference and rolls version 42 back within 3 minutes, without waiting for a human. Only 5% of users saw the bug, briefly, and the trace points straight at the failing call.",cls:{v42:'dead'},lab:{v42:['Order v42','rolled back']},txt:{msg:'auto-rollback in 3 minutes'},lcls:{msg:'ok'},flows:[['users','argo','a',200],['argo','v41','a',150]]},
-  {tag:'summary',title:'What to remember',cap:"Collect metrics, logs and traces with one standard, alert on what users actually feel, follow trace IDs to the cause, and release new code to a small slice first with automatic rollback.",set:{sum:[480,290,1,1]},dim:['sum']}
+  {tag:'summary',title:'What to remember',cap:"Collect metrics, logs and traces with one standard, alert on what users actually feel, follow trace IDs to the cause, and release new code to a small slice first with automatic rollback.",set:{sum:[480,316,1,1]},dim:['sum']}
  ]}
 );
 {const ORD={scale:1,cache:4,db:5};EPS.forEach(e=>{if(!e.n)e.n=ORD[e.id];e.title=e.title||e.name.replace(/^Episode \d+ · /,'')});
@@ -347,6 +357,39 @@ function icon(g,k,x,y){const G=E('g',{class:'ico',transform:`translate(${x},${y}
   else if(k==='firewall'){E('rect',{x:-8,y:-7,width:16,height:14,rx:1.5,class:'ln'},G);E('path',{class:'ln',d:'M-8,-2.3 H8 M-8,2.3 H8 M-2,-7 V-2.3 M3,-2.3 V2.3 M-3,2.3 V7'},G)}
   else{E('rect',{x:-8,y:-7,width:16,height:14,rx:2.5,class:'ln'},G);E('line',{x1:-8,y1:-3,x2:8,y2:-3,class:'ln'},G);E('circle',{cx:-5,cy:-5,r:.9},G)}
 }
+
+// Recap ("What to remember") card: numbered rows + callout, or a two-column compare when the card has a split
+function recap(inner,o){
+  const W=860,x0=-W/2+30,cw=W-60,L=o.lines,title=(L.find(l=>l[0]==='h')||[0,''])[1];
+  const strip=t=>t.replace(/^\d+\.\s*/,'').replace(/^[✓✗]\s*/,'');
+  const T=(cls,x,y,t,p)=>E('text',{class:cls,x,y},p||inner,t);
+  const callout=(y,h,kind,lines)=>{const g=E('g',{class:'rcall rcall-'+kind},inner);E('rect',{x:x0,y,width:cw,height:h,rx:14},g);E('rect',{class:'stripe',x:x0,y:y+8,width:4,height:h-16,rx:2},g);
+    lines.forEach((t,i)=>{const m=/^(Interview line:)\s*(.*)$/.exec(t),y2=y+(h/2)+(lines.length===1?5:-4+i*20);const tx=E('text',{class:'cot',x:x0+20,y:y2},g);if(m){E('tspan',{class:'colab'},tx,m[1]+' ');E('tspan',{},tx,m[2])}else tx.textContent=t})};
+  let H;
+  if(o.split){
+    const items=L.filter(l=>l[0]==='li'),heads=L.filter(l=>l[0]==='h2'),sub=items.slice(0,2),foot=items.slice(2),pc=L.filter(l=>l[0]==='lg'||l[0]==='lb');
+    const colW=(cw-24)/2,colH=232,top0=68;H=top0+colH+14+62+24;const top=-H/2;
+    E('rect',{class:'c',x:-W/2,y:top,width:W,height:H,rx:24},inner);E('rect',{class:'cbar',x:x0,y:top,width:56,height:4,rx:2},inner);
+    T('h',x0,top+46,title);E('text',{class:'chip',x:W/2-30,y:top+44,'text-anchor':'end'},inner,'RECAP');
+    [0,1].forEach(c=>{const cx=x0+c*(colW+24),cy=top+top0;
+      E('rect',{class:'col',x:cx,y:cy,width:colW,height:colH,rx:16},inner);
+      T('h2',cx+20,cy+34,heads[c][1]);T('li2 mut',cx+20,cy+60,sub[c][1]);
+      pc.filter(p=>p[3]===(c?430:undefined)).forEach((p,i)=>{const y=cy+98+i*36,ok=p[0]==='lg';
+        E('circle',{class:ok?'ic-ok':'ic-bad',cx:cx+30,cy:y-5,r:10},inner);
+        E('path',{class:ok?'ic-okp':'ic-badp',d:ok?`M${cx+25.5} ${y-5} l3.2 3.2 l6-6.4`:`M${cx+26} ${y-9} l8 8 M${cx+34} ${y-9} l-8 8`},inner);
+        T('li2',cx+50,y,strip(p[1]))})});
+    callout(top+top0+colH+14,62,'acc',foot.map(f=>f[1]))}
+  else{
+    const items=L.filter(l=>l[0]==='li'),co=L.find(l=>l[0]==='lg'||l[0]==='lb'),rowH=36,first=80;
+    H=first+items.length*rowH+12+(co?48+24:12);const top=-H/2;
+    E('rect',{class:'c',x:-W/2,y:top,width:W,height:H,rx:24},inner);E('rect',{class:'cbar',x:x0,y:top,width:56,height:4,rx:2},inner);
+    T('h',x0,top+48,title);E('text',{class:'chip',x:W/2-30,y:top+46,'text-anchor':'end'},inner,'RECAP');
+    items.forEach((it,i)=>{const y=top+first+i*rowH+8,t=strip(it[1]);
+      E('circle',{class:'nb',cx:x0+14,cy:y-5,r:14},inner);E('text',{class:'num',x:x0+14,y:y-.5},inner,String(i+1));
+      T('li2'+(t.length>92?' sm':''),x0+44,y,t);
+      if(i<items.length-1)E('line',{class:'sep',x1:x0+44,x2:x0+cw,y1:y+rowH/2-5,y2:y+rowH/2-5},inner)});
+    if(co)callout(top+first+items.length*rowH+12,48,co[0]==='lb'?'bad':'acc',[co[1]])}
+  return [W/2,H/2]}
 function mk(type,id,o,layer){
   const outer=E('g',{class:'actor',opacity:0},layer),inner=E('g',{class:'inner'},outer);const A={id,outer,inner,hw:60,hh:30,type,mv:0};
   if(type==='box'){const w=o.w||190,h=o.meter!=null?112:92;A.hw=w/2;A.hh=h/2;const [k,label]=kindOf(id,o);A.kind=k;
@@ -367,6 +410,7 @@ function mk(type,id,o,layer){
   else if(type==='pill'){outer.setAttribute('class','actor pl '+(o.cls||''));A.r=E('rect',{x:-50,y:-15,width:100,height:30,rx:15},inner);A.c=E('text',{'text-anchor':'middle',y:4.5},inner,'');setPill(A,o.t)}
   else if(type==='ceil'){outer.setAttribute('class','actor ceil');A.hw=o.w/2;E('rect',{class:'cz',x:-o.w/2,y:-46,width:o.w,height:46},inner);E('line',{x1:-o.w/2,y1:0,x2:o.w/2,y2:0},inner);E('text',{'text-anchor':'middle',y:-12},inner,'▲ '+o.t+' ▲')}
   else if(type==='q'){A.hw=30;A.hh=36;E('circle',{class:'qbg',r:40},inner);E('text',{class:'qm','text-anchor':'middle',y:24},inner,'?')}
+  else if(type==='card'&&id==='sum'){outer.setAttribute('class','actor card recap');{const r=recap(inner,o);A.hw=r[0];A.hh=r[1]}}
   else if(type==='card'){outer.setAttribute('class','actor card');A.hw=o.w/2;A.hh=o.h/2;const x0=-o.w/2+28,y0=-o.h/2;
     E('rect',{class:'c',x:-o.w/2,y:-o.h/2,width:o.w,height:o.h,rx:18},inner);E('rect',{class:'cbar',x:-o.w/2,y:-o.h/2,width:o.w,height:5,rx:2.5},inner);
     if(o.split)E('line',{class:'sep',x1:-o.w/2+o.split,y1:y0+66,x2:-o.w/2+o.split,y2:y0+250},inner);
@@ -475,12 +519,15 @@ const sceneDur=s=>Math.max(6500,s.cap.length*62);
 const total=()=>ep.scenes.reduce((a,s)=>a+sceneDur(s),0);
 const before=k=>ep.scenes.slice(0,k).reduce((a,s)=>a+sceneDur(s),0);
 function buildTimeline(){
-  const tl=$('tl');tl.innerHTML='<div class="track"><div class="fill"></div><div class="knob"></div></div><div class="marks"></div>';
+  const tl=$('tl');tl.innerHTML='<div class="track"><div class="fill"></div><div class="knob"></div></div><div class="marks"></div><div class="tip" role="presentation" hidden></div>';
   const T=total(),track=tl.querySelector('.track'),marks=tl.querySelector('.marks');
   ep.scenes.forEach((s,k)=>{const l=before(k)/T*100,w=sceneDur(s)/T*100;
     if(k>0){const t=document.createElement('span');t.className='tick';t.style.left=l+'%';track.appendChild(t)}
-    const b=document.createElement('button');b.type='button';b.className='hit';b.style.left=l+'%';b.style.width=w+'%';b.title=`${k+1}. ${s.title}`;b.setAttribute('aria-label',`Scene ${k+1}: ${s.title}`);b.onclick=()=>go(k);track.appendChild(b);
-    const m=document.createElement('button');m.type='button';m.className='mark '+s.tag;m.style.left=l+'%';m.style.width=w+'%';m.tabIndex=-1;m.innerHTML=`<i></i><span>${k+1}</span>`;m.title=`${k+1}. ${TAGS[s.tag]}: ${s.title}`;m.onclick=()=>go(k);marks.appendChild(m)});
+    const b=document.createElement('button');b.type='button';b.className='hit';b.style.left=l+'%';b.style.width=w+'%';b.setAttribute('aria-label',`Scene ${k+1}: ${s.title}`);b.onclick=()=>go(k);track.appendChild(b);
+    const showTip=()=>{const tip=tl.querySelector('.tip');tip.innerHTML=`<b>${String(k+1).padStart(2,'0')} · ${TAGS[s.tag]}</b><span></span>`;tip.lastChild.textContent=s.title;tip.hidden=false;const c=l+w/2,r=tl.clientWidth,tw=tip.offsetWidth,px=Math.min(Math.max(c/100*track.clientWidth+track.offsetLeft,tw/2+4),r-tw/2-4);tip.style.left=px+'px'};
+    const hideTip=()=>{tl.querySelector('.tip').hidden=true};
+    [b].forEach(e=>{e.addEventListener('mouseenter',showTip);e.addEventListener('mouseleave',hideTip);e.addEventListener('focus',showTip);e.addEventListener('blur',hideTip)});
+    const m=document.createElement('button');m.type='button';m.className='mark '+s.tag;m.style.left=l+'%';m.style.width=w+'%';m.tabIndex=-1;m.setAttribute('aria-hidden','true');m.innerHTML='<i></i>';m.addEventListener('mouseenter',showTip);m.addEventListener('mouseleave',hideTip);m.onclick=()=>go(k);marks.appendChild(m)});
 }
 function drawProgress(){const T=total(),p=(before(cur)+Math.min(elapsed,sceneDur(ep.scenes[cur])))/T*100;const tl=$('tl');
   tl.querySelector('.fill').style.width=p+'%';tl.querySelector('.knob').style.left=p+'%';
@@ -509,7 +556,7 @@ function show(k,instant){
     const tf=`translate(${P[0]}px,${P[1]}px) scale(${v.s})`;
     if(instant||!prev||prev.o===0){a.outer.style.transition='none';a.outer.style.transform=`translate(${P[0]}px,${P[1]}px) scale(${v.s*(v.o&&!instant?0.82:1)})`;a.outer.getBoundingClientRect();a.outer.style.transition=''}
     a.outer.style.transform=tf;
-    const dimmed=s.dim&&!s.dim.includes(id)&&v.o>0;a.outer.setAttribute('opacity',dimmed?0.07:v.o);
+    const dimmed=s.dim&&!s.dim.includes(id)&&v.o>0;a.outer.setAttribute('opacity',dimmed?0.03:v.o);
     a.outer.classList.toggle('dead',v.cls==='dead');
     if(a.cop)a.cop.style.transform=`translate(0px,${-a.H-14}px) scale(${v.s>1?1/v.s:1})`;
     if(a.type==='box'){if(v.lab){a.t.textContent=v.lab[0];a.s.textContent=v.lab[1]}else{a.t.textContent=a.o0.t;a.s.textContent=a.o0.s}if(v.meter!=null)setMeter(a,v.meter,instant||!prev)}
@@ -553,8 +600,25 @@ function ripple(P,c,g){const r=E('circle',{class:'rip rs-'+c,cx:P[0],cy:P[1],r:6
 let spoken=false;
 function tickBar(now){if(!playing)return;elapsed=(now-startT)*speed;drawProgress();updTime();
   if(elapsed>=dur&&(!voice||spoken)){next(true);return}raf=requestAnimationFrame(tickBar)}
+
+// Concept notes under the player: definition, key terms, notes and interview questions for the current episode
+let notesFor=null;
+function renderNotes(force){const N=window.__NOTES,box=$('notes');if(!N||!box||!ep)return;const d=N[ep.id];if(!d){box.innerHTML='';return}
+  if(!force&&notesFor===ep.id)return;notesFor=ep.id;
+  const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const title=ep.name.replace(/^Episode \d+ · /,'');
+  box.innerHTML=`<header class="nh"><p class="eyebrow">Concept notes · Episode ${ep.n||EPS.indexOf(ep)+1} of ${EPS.length}</p><h2>${esc(title)}</h2></header>
+<div class="ngrid">
+<article class="nc ndef"><h3>What is it?</h3><p>${esc(d.def)}</p><h4>Key terms</h4><dl>${d.terms.map(t=>`<div><dt>${esc(t[0])}</dt><dd>${esc(t[1])}</dd></div>`).join('')}</dl></article>
+<article class="nc nnotes"><h3>Notes to remember</h3><ul>${d.notes.map(t=>`<li>${esc(t)}</li>`).join('')}</ul></article>
+</div>
+<article class="nc nq"><div class="nqh"><h3>Interview questions <span>${d.qs.length}</span></h3><button type="button" class="go" id="nq-all">Expand all</button></div>
+<div class="nql">${d.qs.map((q,i)=>`<details><summary><i>${String(i+1).padStart(2,'0')}</i><span>${esc(q[0])}</span></summary><p>${esc(q[1])}</p></details>`).join('')}</div>
+<p class="nsrc">Questions reflect topics that recur across public system design interview guides and question banks (DesignGurus, techinterview.org, PracHub, KodeKloud and others). Answers are short talking points; add your own numbers and examples.</p></article>`;
+  const all=$('nq-all');all.onclick=()=>{const ds=box.querySelectorAll('.nql details'),open=[...ds].some(x=>!x.open);ds.forEach(x=>x.open=open);all.textContent=open?'Collapse all':'Expand all'}}
+window.addEventListener('notes-ready',()=>renderNotes(true));
 function doneSet(){try{return new Set(JSON.parse(localStorage.getItem('sd-done')||'[]'))}catch(e){return new Set()}}
-function updStats(){if(!ep)return;const f=t=>{t=Math.round(t/1000);return Math.floor(t/60)+':'+String(t%60).padStart(2,'0')};
+function updStats(){if(!ep)return;renderNotes();const f=t=>{t=Math.round(t/1000);return Math.floor(t/60)+':'+String(t%60).padStart(2,'0')};
 const T=total(),p=Math.min(100,Math.round((before(cur)+Math.min(elapsed,dur))/T*100)),d=doneSet(),set=(id,v)=>{const e=$(id);if(e&&e.textContent!==v)e.textContent=v};
 set('st-name',ep.name.replace(/^Episode \d+ · /,''));set('st-len',f(T));set('st-scenes',ep.scenes.length+' scenes');set('st-ep','Episode '+(EPS.indexOf(ep)+1)+' of '+EPS.length);
 set('st-pct',p+'%');const b=$('st-fill');if(b)b.style.transform='scaleX('+p/100+')';
@@ -570,18 +634,19 @@ function updTime(){updStats();const f=t=>{t=Math.round(t/1000);return Math.floor
 function speak(t,g){spoken=false;try{const ss=window.speechSynthesis;if(!ss){spoken=true;return}ss.cancel();const u=new SpeechSynthesisUtterance(t);u.rate=speed;
   const vs=ss.getVoices();const v=vs.find(v=>/en-IN/i.test(v.lang))||vs.find(v=>/^en/i.test(v.lang));if(v)u.voice=v;u.onend=()=>{if(g===gen)spoken=true};u.onerror=()=>{spoken=true};ss.speak(u);
   setTimeout(()=>{if(g===gen)spoken=true},t.length*110+4000)}catch(e){spoken=true}}
-function play(){playing=true;$('bplay').textContent='❚❚ Pause';$('player').classList.add('playing');const keep=elapsed;show(cur);if(keep&&keep<dur){elapsed=keep;startT=performance.now()-keep/speed}}
+function play(){playing=true;lbl($('bplay'),'pause','Pause');$('player').classList.add('playing');const keep=elapsed;show(cur);if(keep&&keep<dur){elapsed=keep;startT=performance.now()-keep/speed}}
 function pause(){const keep=elapsed;stop();elapsed=keep;drawProgress();updTime()}
-function stop(){playing=false;cancelAnimationFrame(raf);try{window.speechSynthesis&&speechSynthesis.cancel()}catch(e){}if($('bplay'))$('bplay').textContent='▶ Play';if($('player'))$('player').classList.remove('playing')}
+function stop(){playing=false;cancelAnimationFrame(raf);try{window.speechSynthesis&&speechSynthesis.cancel()}catch(e){}lbl($('bplay'),'play','Play');if($('player'))$('player').classList.remove('playing')}
 function next(auto){if(cur<ep.scenes.length-1)show(cur+1);else if(auto){stop();elapsed=dur;drawProgress();markDone();updTime()}}
 function go(k){show(k)}
 $('st-play')&&($('st-play').onclick=()=>$('bplay').click());
 $('bplay').onclick=()=>{if(playing){pause();userPaused=true}else{userPaused=false;if(cur===ep.scenes.length-1&&elapsed>=dur){cur=0;elapsed=0}play()}};
 $('bprev').onclick=()=>show(Math.max(0,cur-1));$('bnext').onclick=()=>show(Math.min(ep.scenes.length-1,cur+1));
 $('brestart').onclick=()=>{cur=0;elapsed=0;userPaused=false;if(playing)show(0);else play()};
-$('bspeed').onclick=()=>{speed=speed===1?1.5:speed===1.5?.75:1;$('bspeed').textContent='Speed '+speed+'×';show(cur)};
+$('bspeed').onclick=()=>{speed=speed===1?1.5:speed===1.5?.75:1;lbl($('bspeed'),'speed',speed+'×');show(cur)};
+lbl($('bplay'),'play','Play');lbl($('bprev'),'back','Back');lbl($('bnext'),'next','Next');lbl($('brestart'),'restart','Restart');lbl($('bspeed'),'speed','1×');lbl($('bvoice'),'volOff','Voice off');
 const vb=$('bvoice');if(!('speechSynthesis' in window))vb.hidden=true;
-vb.onclick=()=>{voice=!voice;vb.classList.toggle('on',voice);vb.setAttribute('aria-pressed',voice);vb.textContent=voice?'🔊 Voice on':'🔈 Voice off';if(!voice){try{speechSynthesis.cancel()}catch(e){}spoken=true}show(cur)};
+vb.onclick=()=>{voice=!voice;vb.classList.toggle('on',voice);vb.setAttribute('aria-pressed',voice);lbl(vb,voice?'volOn':'volOff',voice?'Voice on':'Voice off');if(!voice){try{speechSynthesis.cancel()}catch(e){}spoken=true}show(cur)};
 document.querySelector('.screen').addEventListener('keydown',e=>{if(e.key==='ArrowRight'){e.preventDefault();$('bnext').click()}else if(e.key==='ArrowLeft'){e.preventDefault();$('bprev').click()}else if(e.key===' '){e.preventDefault();$('bplay').click()}});
 const tabs=$('tabs');EPS.forEach((e,i)=>{const b=document.createElement('button');b.type='button';b.setAttribute('role','tab');b.innerHTML=`<i>${String(i+1).padStart(2,'0')}</i><b></b><span></span>`;b.querySelector('b').textContent=e.name.replace(/^Episode \d+ · /,'');b.querySelector('span').textContent=e.sub+' · '+e.scenes.length+' scenes';b.onclick=()=>{EPI=i;load(i,playing)};tabs.appendChild(b)});
 let EPI=0;
