@@ -165,3 +165,12 @@ html{scroll-behavior:smooth}
 .live p{font-size:13px;color:var(--muted);margin-top:6px}
 .livedot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ok);margin-right:6px;animation:hp 1.2s infinite}
 @media (prefers-reduced-motion:reduce){.hot,.hotb,.livedot{animation:none}.log i,.queue i,.uchips div.moved{animation:none}}
+
+/* mobile: let wide diagrams scroll inside their card instead of stretching the page */
+.hero{grid-template-columns:minmax(0,1fr)}
+.live{overflow-x:auto}
+.live p{position:sticky;left:0}
+.wrap>*,.wrap section,.wrap figure{min-width:0}
+@media (max-width:560px){.hero{padding-block:28px 20px}.hero p{font-size:16px}}
+.wrap>section,.wrap>header{grid-template-columns:minmax(0,1fr)}
+.wrap section>*,.wrap header>*{min-width:0}

@@ -15,3 +15,10 @@ img{max-width:100%}
 .sitenav nav a:hover,.sitenav nav a[aria-current="page"]{color:var(--ink,#0f1115)}
 .sitenav nav a[aria-current="page"]{font-weight:600}
 .sitenav a:focus-visible{outline:2px solid var(--accent,#d9531e);outline-offset:3px;border-radius:2px}
+
+@media (max-width:640px){
+.sitenav .in{gap:6px 16px;padding-block:12px}
+.sitenav nav{margin-left:0;width:100%;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;gap:20px}
+.sitenav nav::-webkit-scrollbar{display:none}
+.sitenav nav a{white-space:nowrap;min-height:40px;display:flex;align-items:center}
+}

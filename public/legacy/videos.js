@@ -598,4 +598,11 @@ ov.onclick=()=>setPage('overview');
 $('tabs').addEventListener('click',()=>setPage('video'),true);
 const sp=$('st-play');if(sp)sp.addEventListener('click',()=>setPage('video'),true);
 if(location.hash==='#overview')setPage('overview')}
+// Mobile drawer
+{const root=document.documentElement,mb=$('menu'),sc=$('scrim'),sb=$('sidebar');
+const set=o=>{root.classList.toggle('nav-open',o);mb.setAttribute('aria-expanded',o);mb.setAttribute('aria-label',o?'Close menu':'Open menu');sc.hidden=!o;if(o){const a=sb.querySelector('.tabs button.on')||sb.querySelector('.mi');a&&a.focus&&a.focus({preventScroll:true})}else if(document.activeElement&&sb.contains(document.activeElement))mb.focus()};
+mb.onclick=()=>set(!root.classList.contains('nav-open'));sc.onclick=()=>set(false);
+sb.addEventListener('click',e=>{if(e.target.closest('.tabs button,.mi'))set(false)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&root.classList.contains('nav-open'))set(false)});
+matchMedia('(min-width:1081px)').addEventListener('change',e=>{if(e.matches)set(false)})}
 })();

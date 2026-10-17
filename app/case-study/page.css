@@ -139,5 +139,8 @@ td.no{color:var(--muted);white-space:nowrap}
 .nar-t{font-weight:800;font-size:19px}
 .nar-s{max-width:82ch}
 footer{margin-top:44px;color:var(--muted);font-size:13px}
-@media (max-width:760px){.hero{grid-template-columns:1fr}}
+@media (max-width:760px){.hero{grid-template-columns:minmax(0,1fr)}}
+.wrap>*,.wrap section{min-width:0}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.hot,.hotb{animation:none}}
+.wrap>section,.wrap>header{grid-template-columns:minmax(0,1fr)}
+.wrap section>*,.wrap header>*{min-width:0}
