@@ -1,0 +1,873 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Explainer Videos · System Design, Visually</title>
+<meta name="description" content="12 animated 3D explainers, one for every core system design topic, scene by scene.">
+<meta property="og:title" content="Explainer Videos · System Design, Visually">
+<meta property="og:description" content="12 animated 3D explainers, one for every core system design topic, scene by scene.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#d9531e">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23d9531e'/%3E%3Cpath d='M16 6l9 5v10l-9 5-9-5V11z M7 11l9 5 9-5 M16 16v10' fill='none' stroke='white' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<style>
+.sitenav{position:relative;z-index:20;border-bottom:1px solid var(--line,#d8dce3);background:var(--panel,#fff)}
+.sitenav .in{max-width:1480px;margin:0 auto;padding:10px max(16px,env(safe-area-inset-left,0px));display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.sitenav .brand{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--ink,#161a21);font-family:"Plus Jakarta Sans",system-ui,sans-serif;font-weight:800;font-size:16px;letter-spacing:-.01em}
+.sitenav .brand i{width:26px;height:26px;border-radius:7px;background:#d9531e;display:grid;place-items:center}
+.sitenav .brand svg{width:16px;height:16px}
+.sitenav nav{display:flex;gap:4px;flex-wrap:wrap;margin-left:auto}
+.sitenav nav a{font-family:"Plus Jakarta Sans",system-ui,sans-serif;text-decoration:none;color:var(--muted,#5c6472);font-size:14px;font-weight:600;padding:7px 12px;border-radius:9px}
+.sitenav nav a:hover{color:var(--ink,#161a21);background:var(--soft,var(--bg,#eceff3))}
+.sitenav nav a[aria-current="page"]{color:#fff;background:#d9531e}
+.sitenav a:focus-visible{outline:2px solid #d9531e;outline-offset:2px}
+</style>
+</head>
+<body>
+<header class="sitenav"><div class="in"><a class="brand" href="index.html"><i><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linejoin="round"><path d="M12 3 20 7.5v9L12 21 4 16.5v-9z M4 7.5 12 12l8-4.5 M12 12v9"/></svg></i>System Design, Visually</a><nav aria-label="Site"><a href="index.html">Home</a><a href="videos.html" aria-current="page">Videos</a><a href="manual.html">Field manual</a><a href="case-study.html">Case study</a></nav></div></header>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: a video player page. Episode tabs → 16:9 stage (SVG scenes with persistent actors) → caption bar → timeline + controls → clickable transcript */
+:root{
+  --bg:#f3f4f6; --panel:#ffffff; --ink:#161a21; --muted:#5c6472; --line:#d8dce3; --soft:#eceff3;
+  --stage:#fbfbfc; --grid:#d9dde5; --vig:#e9ecf1;
+  --iso-t:#ffffff; --iso-l:#e6ecfa; --iso-r:#c6d4f2; --iso-e:#3a62c9; --slot:#22355e; --floor:#f3f6fb; --floor-g:#dfe5f0; --floor-m:#c9d3e6; --plat:#ffffff; --plat-s:#2a56c6; --cable:#2a56c6; --shadow:rgba(20,40,90,.10);
+  --accent:#d9531e; --accent-soft:#fcebe2; --blue:#2457c5; --blue-soft:#e4ebfa;
+  --ok:#16774c; --ok-soft:#dff2e8; --bad:#c2352a; --bad-soft:#fbe5e2; --warn:#9a6200; --warn-soft:#fbf0d9;
+  --sans:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e1115; --panel:#161a20; --ink:#e9ecf1; --muted:#9aa2b0; --line:#2a313b; --soft:#1d222a;
+  --stage:#12161c; --grid:#262d38; --vig:#0b0e12; --iso-t:#2c3548; --iso-l:#222a3a; --iso-r:#1a2130; --iso-e:#7ea4ff; --slot:#0b0f17; --floor:#131923; --floor-g:#1d2533; --floor-m:#2a3547; --plat:#1f2737; --plat-s:#3b67d6; --cable:#5f8cff; --shadow:rgba(0,0,0,.35);
+  --accent:#ff8a57; --accent-soft:#3a2117; --blue:#86a9ff; --blue-soft:#1c2740;
+  --ok:#5fd59c; --ok-soft:#132e21; --bad:#ff7d72; --bad-soft:#3a1a17; --warn:#f2bd55; --warn-soft:#352812; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1115; --panel:#161a20; --ink:#e9ecf1; --muted:#9aa2b0; --line:#2a313b; --soft:#1d222a;
+  --stage:#12161c; --grid:#262d38; --vig:#0b0e12; --iso-t:#2c3548; --iso-l:#222a3a; --iso-r:#1a2130; --iso-e:#7ea4ff; --slot:#0b0f17; --floor:#131923; --floor-g:#1d2533; --floor-m:#2a3547; --plat:#1f2737; --plat-s:#3b67d6; --cable:#5f8cff; --shadow:rgba(0,0,0,.35);
+  --accent:#ff8a57; --accent-soft:#3a2117; --blue:#86a9ff; --blue-soft:#1c2740;
+  --ok:#5fd59c; --ok-soft:#132e21; --bad:#ff7d72; --bad-soft:#3a1a17; --warn:#f2bd55; --warn-soft:#352812; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.6;margin:0}
+.wrap{max-width:1480px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:36px 72px;display:grid;gap:18px}
+h1,h2,h3{margin:0;line-height:1.15;text-wrap:balance;letter-spacing:-.02em}
+p{margin:0}
+.eyebrow{font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);font-weight:600}
+header h1{font-size:clamp(30px,5vw,46px);font-weight:800;margin:6px 0 8px}
+header p{color:var(--muted);max-width:70ch;font-size:17px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tabs button{font:inherit;cursor:pointer;text-align:left;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:12px;padding:10px 16px 10px 12px;display:grid;grid-template-columns:auto 1fr;column-gap:12px;min-width:230px;align-items:center}
+.tabs button i{grid-row:span 2;font-style:normal;font-family:var(--mono);font-weight:700;font-size:13px;width:34px;height:34px;border-radius:9px;display:grid;place-items:center;background:var(--soft);color:var(--muted)}
+.tabs button.on i{background:var(--accent);color:#fff}
+.tabs button b{font-size:14.5px}
+.tabs button span{font-size:12.5px;color:var(--muted)}
+.tabs button.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.tabs button:focus-visible,.ctl button:focus-visible,.tl button:focus-visible,.tr li:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.player{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.screen{position:relative;background:var(--stage);border-bottom:1px solid var(--line)}
+.screen svg{display:block;width:100%;height:auto}
+.cap{padding:16px 22px 18px;display:grid;gap:4px;min-height:112px;background:var(--panel)}
+.cap .k{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:6px}
+.cap .k .tg{font-family:var(--mono);font-size:10.5px;font-weight:700;letter-spacing:.06em;border-radius:5px;padding:2px 7px}
+.rise{animation:rise .55s cubic-bezier(.2,.7,.2,1)}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}}
+.cap p{font-size:clamp(16px,2vw,19px);font-weight:500;max-width:80ch}
+.ctl{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 16px;border-top:1px solid var(--line)}
+.ctl button{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:7px 12px;cursor:pointer;min-height:36px}
+.ctl button:hover{border-color:var(--accent)}
+.ctl .play{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:700;min-width:108px}
+.ctl .on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+.ctl .time{font-family:var(--mono);font-size:12.5px;color:var(--muted);margin-left:auto;font-variant-numeric:tabular-nums}
+.main{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:18px;align-items:start}
+.main>*{min-width:0}
+.side{background:var(--panel);border:1px solid var(--line);border-radius:16px;display:flex;flex-direction:column;position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:hidden}
+.sideh{display:flex;justify-content:space-between;align-items:baseline;padding:16px 18px 12px;border-bottom:1px solid var(--line)}
+.sideh h2{font-size:18px} .sideh span{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+.tr{list-style:none;margin:0;padding:10px;display:grid;gap:6px;overflow-y:auto;flex:1;min-height:0;scrollbar-width:thin}
+.tr li{display:grid;grid-template-columns:26px 1fr;gap:4px 10px;align-items:start;border:1px solid transparent;border-radius:10px;padding:10px 12px;cursor:pointer;position:relative}
+.tr li:hover{background:var(--soft)}
+.tr li.on{border-color:var(--accent);background:var(--accent-soft)}
+.tr li.done .n{color:var(--accent)}
+.tr .n{font-family:var(--mono);font-size:11.5px;color:var(--muted);padding-top:3px;grid-row:span 2}
+.tr .tg{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border-radius:5px;padding:2px 6px;width:max-content}
+.tr .tx b{display:block;font-size:14.5px;line-height:1.35;margin-top:3px}
+.tr .tx span{display:block;font-size:13px;line-height:1.5;color:var(--muted);margin-top:3px}
+.tr li:not(.on) .tx span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+@media (max-width:1080px){.main{grid-template-columns:1fr}.side{position:static;max-height:520px}}
+.tg.problem{background:var(--bad-soft);color:var(--bad)} .tg.fix{background:var(--ok-soft);color:var(--ok)}
+.tg.idea{background:var(--blue-soft);color:var(--blue)} .tg.question{background:var(--warn-soft);color:var(--warn)}
+.tg.start,.tg.next{background:var(--soft);color:var(--ink)} .tg.summary{background:var(--ink);color:var(--bg)} .tg.result{background:var(--ok-soft);color:var(--ok)}
+
+/* stage vocabulary */
+.gridl{stroke:var(--grid);stroke-width:1}
+.actor{transition:transform .9s cubic-bezier(.45,0,.2,1),opacity .6s ease}
+.ab{fill:var(--panel);stroke:var(--line);stroke-width:2}
+.ab.acc{fill:var(--accent-soft);stroke:var(--accent)} .ab.db{fill:var(--blue-soft);stroke:var(--blue)} .ab.okb{fill:var(--ok-soft);stroke:var(--ok)}
+.at{fill:var(--ink);font-family:var(--sans);font-weight:800;font-size:17px}
+.as{fill:var(--muted);font-family:var(--mono);font-size:12px}
+.mbg{fill:var(--soft)} .mfill{transition:width .8s ease,fill .4s} .mfill.l{fill:var(--ok)} .mfill.m{fill:var(--warn)} .mfill.h{fill:var(--bad)}
+.mt{font-family:var(--mono);font-size:10.5px;fill:var(--muted)}
+.xx{opacity:0;transition:opacity .3s}
+.xx line{stroke:var(--bad);stroke-width:7;stroke-linecap:round}
+.dead .ab{fill:var(--bad-soft);stroke:var(--bad)} .dead .xx{opacity:1} .dead .at,.dead .as{opacity:.45}
+.person{fill:var(--muted)}
+.cnt{fill:var(--ink);font-family:var(--sans);font-weight:800;font-size:16px}
+.pl rect{fill:var(--soft);stroke:var(--line);stroke-width:1.5}
+.pl text{fill:var(--ink);font-family:var(--mono);font-size:12.5px;font-weight:600}
+.pl.acc rect{fill:var(--accent-soft);stroke:var(--accent)} .pl.acc text{fill:var(--accent)}
+.pl.bad rect{fill:var(--bad-soft);stroke:var(--bad)} .pl.bad text{fill:var(--bad)}
+.pl.ok rect{fill:var(--ok-soft);stroke:var(--ok)} .pl.ok text{fill:var(--ok)}
+.pl.warn rect{fill:var(--warn-soft);stroke:var(--warn)} .pl.warn text{fill:var(--warn)}
+.ceil line{stroke:var(--bad);stroke-width:2.5;stroke-dasharray:8 6}
+.ceil text{fill:var(--bad);font-family:var(--mono);font-size:12px;font-weight:600}
+.qm{fill:var(--warn);font-family:var(--sans);font-weight:800;font-size:72px}
+.card rect.c{fill:var(--panel);stroke:var(--line);stroke-width:2}
+.card .h{fill:var(--ink);font-family:var(--sans);font-weight:800;font-size:20px}
+.card .h2{fill:var(--accent);font-family:var(--sans);font-weight:800;font-size:16px}
+.card .li{fill:var(--ink);font-family:var(--sans);font-size:14px}
+.card .lg{fill:var(--ok);font-family:var(--sans);font-size:14px;font-weight:600}
+.card .lb{fill:var(--bad);font-family:var(--sans);font-size:14px;font-weight:600}
+.card .sep{stroke:var(--line);stroke-width:1.5}
+.bar-bg{fill:var(--soft)} .bar-b{fill:var(--bad)} .bar-g{fill:var(--ok)}
+.shake{animation:sh .5s ease-in-out 3}
+@keyframes sh{20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+.pk-a{fill:var(--accent)} .pk-g{fill:var(--ok)} .pk-b{fill:var(--bad)} .pk-y{fill:var(--warn)} .pk-u{fill:var(--blue)}
+.ovtag rect{rx:7px} .ovtag text{font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.06em}
+.ov.problem rect{fill:var(--bad-soft)} .ov.problem text{fill:var(--bad)}
+.ov.fix rect,.ov.result rect{fill:var(--ok-soft)} .ov.fix text,.ov.result text{fill:var(--ok)}
+.ov.idea rect{fill:var(--blue-soft)} .ov.idea text{fill:var(--blue)}
+.ov.question rect{fill:var(--warn-soft)} .ov.question text{fill:var(--warn)}
+.ov.start rect,.ov.next rect{fill:var(--soft)} .ov.start text,.ov.next text{fill:var(--ink)}
+.ov.summary rect{fill:var(--ink)} .ov.summary text{fill:var(--bg)}
+.ovt{fill:var(--ink);font-family:var(--sans);font-weight:800;font-size:23px;letter-spacing:-.02em}
+.ovn{fill:var(--muted);font-family:var(--mono);font-size:12px}
+.fade{transition:opacity .5s}
+
+/* timeline */
+.tl{padding:16px 18px 4px;display:grid;gap:8px}
+.track{position:relative;height:10px;border-radius:5px;background:var(--soft);box-shadow:inset 0 0 0 1px var(--line)}
+.track .fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:5px;background:linear-gradient(90deg,var(--accent),color-mix(in srgb,var(--accent) 70%,#ffd36b))}
+.track .knob{position:absolute;top:50%;left:0;width:18px;height:18px;border-radius:50%;background:var(--panel);border:3px solid var(--accent);transform:translate(-50%,-50%);box-shadow:0 2px 6px rgba(0,0,0,.25);pointer-events:none}
+.track .tick{position:absolute;top:1px;bottom:1px;width:2px;margin-left:-1px;background:var(--panel);opacity:.9;pointer-events:none}
+.track .hit{position:absolute;top:-8px;bottom:-8px;background:transparent;border:0;padding:0;cursor:pointer}
+.marks{position:relative;height:30px}
+.mark{position:absolute;top:0;height:30px;background:transparent;border:0;padding:0;cursor:pointer;display:flex;align-items:center;gap:4px;font:inherit}
+.mark i{width:9px;height:9px;border-radius:50%;background:var(--muted);flex:none;margin-left:1px;opacity:.55}
+.mark span{font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+.mark.problem i{background:var(--bad)} .mark.fix i,.mark.result i{background:var(--ok)} .mark.idea i{background:var(--blue)} .mark.question i{background:var(--warn)} .mark.summary i{background:var(--ink)}
+.mark.done i,.mark.on i{opacity:1} .mark.on i{box-shadow:0 0 0 3px var(--panel),0 0 0 5px currentColor;color:var(--accent)}
+.mark.on span{color:var(--ink);font-weight:700}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);padding:0 18px 4px}
+.legend span::before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;background:var(--c)}
+/* stage v2 */
+.dotg{fill:var(--grid)}
+.tagbar{fill:var(--line);transition:fill .4s} .tagbar.problem{fill:var(--bad)} .tagbar.fix,.tagbar.result{fill:var(--ok)} .tagbar.idea{fill:var(--blue)} .tagbar.question{fill:var(--warn)} .tagbar.summary,.tagbar.start,.tagbar.next{fill:var(--accent)}
+.glow{fill:none;stroke:var(--bad);stroke-width:2;opacity:0;transition:opacity .4s}
+.hotload .glow{opacity:.55;animation:pulse 1.1s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.12}}
+.ab{filter:drop-shadow(0 6px 14px rgba(15,20,30,.10))}
+.cyl{fill:none;stroke:inherit;stroke-width:2}
+.ab.db+.cyl{stroke:var(--blue)}
+.icobg{fill:var(--soft)} .icobg.acc{fill:color-mix(in srgb,var(--accent) 22%,transparent)} .icobg.db{fill:color-mix(in srgb,var(--blue) 20%,transparent)}
+.ico{fill:var(--ink)} .ico .ln{fill:none;stroke:var(--ink);stroke-width:1.6;stroke-linecap:round}
+.ico rect{fill:var(--muted)} .ico .led{fill:var(--ok);animation:blink 1.2s steps(2,start) infinite}
+@keyframes blink{50%{opacity:.25}}
+.dead .ico .led{fill:var(--bad);animation:none}
+.ak{fill:var(--muted);font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.09em}
+.xx{opacity:0;transition:opacity .3s} .xx .xbg{fill:var(--bad);stroke:var(--panel);stroke-width:3} .xx line{stroke:#fff;stroke-width:3;stroke-linecap:round}
+.offl{opacity:0;transition:opacity .3s} .offl rect{fill:var(--bad)} .offl text{fill:#fff;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em}
+.dead .offl{opacity:1}
+.dead .mfill{fill:var(--bad);opacity:.35}
+.dead .ab{fill:var(--bad-soft);stroke:var(--bad);stroke-dasharray:6 5}
+.crowdbg{fill:var(--soft);opacity:.8}
+.cz{fill:var(--bad);opacity:.07}
+.qbg{fill:var(--warn-soft);stroke:var(--warn);stroke-width:2;stroke-dasharray:5 5}
+.card rect.c{filter:drop-shadow(0 12px 28px rgba(15,20,30,.18))} .card .cbar{fill:var(--accent)}
+.wire{opacity:0;transition:opacity .5s} .wire.in{opacity:1}
+.wb{stroke:var(--line);stroke-width:3;fill:none;stroke-linecap:round}
+.wf{fill:none;stroke-width:2;stroke-dasharray:3 9;stroke-linecap:round;opacity:.7;animation:flow 1s linear infinite}
+.wf-a{stroke:var(--accent)} .wf-g{stroke:var(--ok)} .wf-b{stroke:var(--bad)} .wf-y{stroke:var(--warn)} .wf-u{stroke:var(--blue)}
+@keyframes flow{to{stroke-dashoffset:-12}}
+.rip{fill:none;stroke-width:2.5;transform-box:fill-box;transform-origin:center;animation:rip .6s ease-out forwards}
+.rs-a{stroke:var(--accent)} .rs-g{stroke:var(--ok)} .rs-b{stroke:var(--bad)} .rs-y{stroke:var(--warn)} .rs-u{stroke:var(--blue)}
+@keyframes rip{from{transform:scale(.6);opacity:.9}to{transform:scale(3.4);opacity:0}}
+.ping .ab{animation:ping .35s ease-out}
+@keyframes ping{40%{stroke-width:3.5}}
+.ovg.rise{animation:rise .55s cubic-bezier(.2,.7,.2,1)}
+.player.playing .screen{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 30%,transparent)}
+@media (prefers-reduced-motion:reduce){.wf,.ico .led,.hotload .glow,.rip,.ping .ab,.rise,.ovg.rise{animation:none}}
+
+/* view toggle */
+.bar2{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.view{display:inline-flex;border:1px solid var(--line);border-radius:12px;padding:4px;background:var(--panel);gap:4px}
+.view button{font:inherit;font-size:14px;font-weight:600;border:0;background:transparent;color:var(--muted);border-radius:8px;padding:8px 14px;cursor:pointer;display:flex;align-items:center;gap:8px}
+.view button svg{width:18px;height:18px}
+.view button.on{background:var(--accent);color:#fff}
+.view button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.viewlbl{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-right:4px}
+/* isometric world */
+.fl{fill:var(--floor)} .flg{stroke:var(--floor-g);stroke-width:1} .flg.m{stroke:var(--floor-m);stroke-width:1.3} .tile{fill:var(--floor-g);opacity:.55}
+.shadow{fill:var(--shadow)}
+.f-t,.f-l,.f-r,.c-s,.c-t{stroke:var(--iso-e);stroke-width:1.2;stroke-linejoin:round}
+.f-t,.c-t{fill:var(--iso-t)} .f-l,.c-s{fill:var(--iso-l)} .f-r{fill:var(--iso-r)} .c-b{fill:none;stroke:var(--iso-e);stroke-width:1.2}
+.dbk .c-s{fill:color-mix(in srgb,var(--blue) 26%,var(--iso-l))} .dbk .c-t{fill:color-mix(in srgb,var(--blue) 12%,var(--iso-t))}
+.acck .f-t{fill:color-mix(in srgb,var(--accent) 16%,var(--iso-t));stroke:var(--accent)} .acck .f-l{fill:color-mix(in srgb,var(--accent) 30%,var(--iso-l));stroke:var(--accent)} .acck .f-r{fill:color-mix(in srgb,var(--accent) 45%,var(--iso-r));stroke:var(--accent)}
+.acck .c-s{fill:color-mix(in srgb,var(--accent) 30%,var(--iso-l));stroke:var(--accent)} .acck .c-t{fill:color-mix(in srgb,var(--accent) 14%,var(--iso-t));stroke:var(--accent)} .acck .c-b{stroke:var(--accent)}
+.slot{fill:var(--slot)}
+.led3{fill:var(--ok);animation:blink 1.2s steps(2,start) infinite} .led3.b{fill:var(--blue);animation-duration:1.7s}
+.d-s{fill:var(--plat-s)} .d-t{fill:var(--plat);stroke:var(--plat-s);stroke-width:2} .d-s.acc{fill:var(--accent)} .d-t.acc{stroke:var(--accent)}
+.ico3{fill:var(--accent)} .ln3{stroke:var(--accent);stroke-width:2.6;fill:none;stroke-linecap:round}
+.p-sh{fill:var(--shadow)} .p-b{fill:var(--plat-s)} .p-h{fill:var(--iso-e)}
+.cnt3{fill:var(--ink);font-family:var(--sans);font-weight:800;font-size:15px}
+.lead{stroke:var(--iso-e);stroke-width:1.4;stroke-dasharray:2 3} .leaddot{fill:var(--iso-e)}
+.co{fill:var(--panel);stroke:var(--line);stroke-width:1.2;filter:drop-shadow(0 6px 14px var(--shadow))}
+.callout{transition:transform .9s cubic-bezier(.45,0,.2,1)}
+.co-t{fill:var(--ink);font-family:var(--sans);font-weight:800;font-size:14px} .co-s{fill:var(--muted);font-family:var(--mono);font-size:10.5px}
+.glow3{fill:none;stroke:var(--bad);stroke-width:3;opacity:0}
+.hotload .glow3{opacity:.75;animation:pulse 1.1s ease-in-out infinite} .hotload .co{stroke:var(--bad)}
+.obj.dead .f-t,.obj.dead .f-l,.obj.dead .f-r,.obj.dead .c-s,.obj.dead .c-t{fill:var(--bad-soft);stroke:var(--bad);stroke-dasharray:4 3}
+.obj.dead .d-s{fill:var(--bad)} .obj.dead .d-t{stroke:var(--bad)} .obj.dead .led3{fill:var(--bad);animation:none} .obj.dead .co{stroke:var(--bad)} .obj.dead .slot{fill:var(--bad);opacity:.4}
+.cable .wb{stroke:var(--cable);stroke-width:4.5;opacity:.9}
+.cable .wf{stroke-width:2;opacity:.95;stroke-dasharray:2 10}
+.ping .d-t{animation:ping3 .4s ease-out} @keyframes ping3{40%{stroke-width:4}}
+@media (prefers-reduced-motion:reduce){.led3,.hotload .glow3,.ping .d-t{animation:none}}
+
+/* new kinds */
+.ab.ext{fill:var(--soft);stroke:var(--muted);stroke-dasharray:6 5} .icobg.ext{fill:var(--line)}
+.d-t.ext{stroke:var(--muted);stroke-dasharray:6 5} .d-s.ext{fill:var(--muted)}
+.extk .f-t{fill:var(--soft);stroke:var(--muted);stroke-dasharray:4 3} .extk .f-l{fill:color-mix(in srgb,var(--muted) 18%,var(--soft));stroke:var(--muted);stroke-dasharray:4 3} .extk .f-r{fill:color-mix(in srgb,var(--muted) 32%,var(--soft));stroke:var(--muted);stroke-dasharray:4 3}
+.okk .f-t{fill:color-mix(in srgb,var(--ok) 14%,var(--iso-t));stroke:var(--ok)} .okk .f-l{fill:color-mix(in srgb,var(--ok) 28%,var(--iso-l));stroke:var(--ok)} .okk .f-r{fill:color-mix(in srgb,var(--ok) 42%,var(--iso-r));stroke:var(--ok)}
+.d-s.okd{fill:var(--ok)} .d-t.okd{stroke:var(--ok)}
+.okk .slot.msg{fill:var(--ok);opacity:.85} .acck .slot.msg{fill:var(--accent);opacity:.85}
+.dbb .f-t{fill:color-mix(in srgb,var(--blue) 12%,var(--iso-t))} .dbb .f-l{fill:color-mix(in srgb,var(--blue) 26%,var(--iso-l))} .dbb .f-r{fill:color-mix(in srgb,var(--blue) 40%,var(--iso-r))}
+.screen3{fill:var(--slot)}
+.ico .ln{vector-effect:non-scaling-stroke}
+/* episode tabs (12) */
+.bar2{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start}
+.tabs{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:8px!important}
+.tabs button{min-width:0!important;padding:8px 12px 8px 8px!important;column-gap:10px!important}
+.tabs button i{width:30px!important;height:30px!important;font-size:12px!important}
+.tabs button b{font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tabs button span{font-size:11.5px!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:860px){.bar2{grid-template-columns:1fr}.bar2>div:last-child{justify-self:start}}
+@media (prefers-reduced-motion:reduce){.actor,.mfill,.fade{transition:none}.shake{animation:none}}
+</style>
+
+<div class="wrap">
+<header>
+  <p class="eyebrow">System design · explainer videos</p>
+  <h1>Watch each problem appear, then watch it get fixed</h1>
+  <p>Each episode is a short animated story. Every scene shows one problem a growing app hits, then the technique that solves it, then the next problem that solution creates. Press play, or click any line in the transcript to jump there.</p>
+</header>
+<div class="bar2"><div class="tabs" role="tablist" id="tabs"></div>
+<div><span class="viewlbl">View</span><div class="view" id="view" role="group" aria-label="Choose view">
+<button type="button" data-v="3d"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 2.5 17 6.5v7L10 17.5 3 13.5v-7z M3 6.5 10 10.5 17 6.5 M10 10.5v7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>3D isometric</button>
+<button type="button" data-v="2d"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="4" width="6" height="5" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="11.5" y="11" width="6" height="5" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8.5 6.5h3.5v4.5" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>2D diagram</button>
+</div></div></div>
+<div class="main">
+<div class="player" id="player">
+  <div class="screen" tabindex="0" aria-label="Video stage. Use left and right arrow keys to move between scenes, space to play or pause."><svg id="stage" viewBox="0 0 960 540" role="img" aria-label="Animated scene"></svg></div>
+  <div class="cap" aria-live="polite"><p class="k" id="capk"></p><p id="capt"></p></div>
+  <div class="tl" id="tl"></div>
+  <div class="legend" aria-hidden="true"><span style="--c:var(--bad)">Problem</span><span style="--c:var(--ok)">Fix / result</span><span style="--c:var(--blue)">Idea</span><span style="--c:var(--warn)">Question</span></div>
+  <div class="ctl">
+    <button type="button" class="play" id="bplay">▶ Play</button>
+    <button type="button" id="bprev" aria-label="Previous scene">⏮ Back</button>
+    <button type="button" id="bnext" aria-label="Next scene">Next ⏭</button>
+    <button type="button" id="brestart">↺ Restart</button>
+    <button type="button" id="bspeed" aria-label="Playback speed">Speed 1×</button>
+    <button type="button" id="bvoice" aria-pressed="false">🔈 Voice off</button>
+    <span class="time" id="time"></span>
+  </div>
+</div>
+<aside class="side" aria-label="Transcript"><div class="sideh"><h2>Transcript</h2><span id="trc"></span></div><ol class="tr" id="tr"></ol></aside>
+</div>
+</div>
+<script>
+(function(){
+"use strict";
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const NS='http://www.w3.org/2000/svg';
+const $=id=>document.getElementById(id);
+function E(t,a,p,txt){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;if(p)p.appendChild(e);return e}
+const TAGS={start:'START',problem:'PROBLEM',fix:'FIX',idea:'IDEA',question:'QUESTION',result:'RESULT',next:'WHAT’S NEXT',summary:'SUMMARY'};
+
+/* ================= EPISODES ================= */
+const EPS=[
+{id:'scale',o3:{ceil:[640,100]},name:'Episode 1 · Scaling',sub:'Vertical vs horizontal scaling',
+ actors:[
+  ['crowd','users',{cnt:'100 users'}],
+  ['box','S1',{t:'Server',s:'2 CPU · 4 GB',meter:15}],['box','S2',{t:'Server 2',s:'8 CPU · 32 GB',meter:40}],['box','S3',{t:'Server 3',s:'8 CPU · 32 GB',meter:40}],
+  ['box','S4',{t:'Server 4',s:'added at 7:45 pm',meter:45}],['box','S5',{t:'Server 5',s:'added at 8:00 pm',meter:45}],
+  ['box','LB',{t:'Load balancer',s:'one address for all',cls:'acc',h:84}],['box','redis',{t:'Session store',s:'Redis · shared',cls:'db',w:190,h:84}],
+  ['box','db',{t:'Database',s:'one primary',cls:'db',w:190,meter:90}],
+  ['pill','sess',{t:'Priya’s login',cls:'acc'}],['ceil','ceil',{w:400,t:'Biggest machine you can rent'}],['pill','cost',{t:'₹12 lakh / month',cls:'warn'}],
+  ['pill','clock',{t:'8:00 pm · 5 servers',cls:'ok'}],['q','q'],
+  ['card','pros',{w:230,h:150,lines:[['h2','Why it’s tempting',22],['lg','✓ No code changes',56],['lg','✓ One machine to manage',84],['lg','✓ No network between servers',112]]}],
+  ['card','sum',{w:840,h:380,lines:[['h','Vertical vs horizontal scaling',40],['h2','Vertical · scale up',84],['h2','Horizontal · scale out',84,430],
+    ['li','Make one machine bigger',116],['li','Add more ordinary machines',116,430],['lg','✓ Simple, no code changes',150],['lg','✓ Grows almost without limit',150,430],
+    ['lg','✓ Good first step, great for databases',178],['lg','✓ One machine dies, others keep serving',178,430],['lb','✗ Hardware ceiling, cost explodes',206],['lb','✗ Needs a load balancer',206,430],
+    ['lb','✗ Single point of failure',234],['lb','✗ Servers must be stateless',234,430],
+    ['li','Real systems do both: scale stateless app servers out from day one,',290],['li','and scale the database up for as long as possible before sharding it.',314]],split:400}]
+ ],
+ scenes:[
+  {tag:'start',title:'Day one: 100 users',cap:'Our food app launches. 100 people use it, and one small server with 2 CPUs and 4 GB of memory handles every request easily. Its load meter sits at 15%.',
+   set:{users:[140,280,1,1],S1:[520,280,1,1]},flows:[['users','S1','a',900]]},
+  {tag:'problem',title:'One server can’t keep up',cap:'Word spreads. At dinner time 10,000 people open the app at once. The single server hits 96% load, requests queue up, and pages take 8 seconds to load.',
+   txt:{users:'10,000 users'},meter:{S1:96},shake:['S1'],flows:[['users','S1','a',170],['S1','users','b',700]]},
+  {tag:'fix',title:'Fix #1: vertical scaling',cap:'The first fix most teams try is vertical scaling, also called scaling up: move the same app to a much bigger machine with 32 CPUs and 128 GB. Nothing in the code changes. Load drops back to 38%.',
+   set:{S1:[540,280,1.5,1]},lab:{S1:['Bigger server','32 CPU · 128 GB']},meter:{S1:38},flows:[['users','S1','a',170],['S1','users','g',260]]},
+  {tag:'idea',title:'Why it’s tempting',cap:'Scaling up is attractive because it is simple: no code changes, still only one machine to look after, and no network calls between servers. It is a perfectly good first step.',
+   set:{pros:[830,280,1,1]},flows:[['users','S1','a',220]]},
+  {tag:'problem',title:'Problem: there is a ceiling',cap:'Users keep growing to one million. Even the biggest machine you can rent runs out of power, and each size up costs far more than the last. You can’t buy your way past the hardware limit.',
+   set:{pros:[830,280,1,0],S1:[540,290,1.85,1],ceil:[540,150,1,1],cost:[540,470,1,1]},txt:{users:'1,000,000 users'},lab:{S1:['Biggest server','448 CPU · 12 TB']},meter:{S1:100},shake:['S1'],flows:[['users','S1','a',110],['S1','users','b',500]]},
+  {tag:'problem',title:'Problem: single point of failure',cap:'Worse, it is still just one machine. When it crashes, or even needs a security update and a restart, every single user sees an error. This is called a single point of failure.',
+   set:{ceil:[540,150,1,0],cost:[540,470,1,0]},cls:{S1:'dead'},flows:[['users','S1','b',260]]},
+  {tag:'fix',title:'Fix #2: horizontal scaling',set3:{S1:[560,120],S2:[700,280],S3:[560,440]},cap:'Horizontal scaling, or scaling out, takes the opposite approach: instead of one giant machine, run several ordinary servers side by side, each with the same code. Need more capacity? Add another server.',
+   set:{S1:[600,120,1,1],S2:[600,280,1,1],S3:[600,440,1,1]},cls:{S1:''},lab:{S1:['Server 1','8 CPU · 32 GB']},meter:{S1:40}},
+  {tag:'question',title:'But who picks a server?',cap:'There is a catch. The app on Priya’s phone only knows one address. With three servers, something has to decide which server should answer each request.',
+   set:{q:[370,280,1,1]},flows:[['users','q','a',350]]},
+  {tag:'fix',title:'Fix: a load balancer',cap:'We put a load balancer in front. Users talk only to it, and it spreads requests across the servers, here in turn: server 1, then 2, then 3. Each server now carries about a third of the traffic.',
+   set:{q:[370,280,1,0],LB:[370,280,1,1]},flows:[['users','LB','a',200],['LB',['S1','S2','S3'],'a',200]]},
+  {tag:'result',title:'A server crashes: nobody notices',cap:'Now when server 2 crashes, the load balancer’s health check notices within seconds and stops sending it traffic. Servers 1 and 3 absorb the load. Users never see an error. No more single point of failure.',
+   cls:{S2:'dead'},meter:{S1:62,S3:62},flows:[['users','LB','a',200],['LB',['S1','S3'],'a',200]]},
+  {tag:'problem',title:'Problem: logged out at random',cap:'A new bug appears. Priya logs in, and server 1 remembers her login in its own memory. Her next tap goes to server 3, which has never heard of her, so she is suddenly logged out.',
+   set:{sess:[790,120,1,1]},cls:{S2:''},meter:{S1:40,S3:40},seq:[['users','LB','a',0],['LB','S1','a',.9],['users','LB','a',2.2],['LB','S3','b',3.1]]},
+  {tag:'fix',title:'Fix: make servers stateless',set3:{redis:[875,280],sess:[875,345]},cap:'The fix is to make servers stateless: they keep nothing about a user in their own memory. Logins and carts move to a shared store such as Redis, so any server can serve any user on any request.',
+   set:{redis:[845,280,1,1],sess:[845,345,1,1]},flows:[['users','LB','a',220],['LB',['S1','S2','S3'],'a',220],['S1','redis','u',900],['S3','redis','u',900]]},
+  {tag:'fix',title:'Autoscaling: pay only for what you use',set3:{S1:[560,100],S2:[700,170],S3:[560,240],S4:[700,310],S5:[560,380]},cap:'Traffic changes through the day. An autoscaler watches the load and adds servers as the 8 pm rush builds, then removes them at night, so we only pay for machines we actually need. This only works because servers are stateless.',
+   set:{S1:[600,96,.74,1],S2:[600,182,.74,1],S3:[600,268,.74,1],S4:[600,354,.74,1],S5:[600,440,.74,1],clock:[370,390,1,1],sess:[845,345,1,1]},
+   meter:{S1:45,S2:45,S3:45},flows:[['users','LB','a',150],['LB',['S1','S2','S3','S4','S5'],'a',150]]},
+  {tag:'next',title:'The next bottleneck: the database',set3:{S1:[560,100],S2:[700,170],S3:[560,240],S4:[700,310],S5:[560,380]},cap:'All these servers still read and write one database. As we keep adding servers, that database fills up to 90% load. Scaling it is harder because it holds the data. That is Episode 3.',
+   set:{sess:[845,345,1,0],clock:[370,390,1,0],db:[845,450,1,1]},shake:['db'],flows:[['users','LB','a',150],['LB',['S1','S2','S3','S4','S5'],'a',150],['S2','db','u',260],['S4','db','u',260],['S5','db','u',300]]},
+  {tag:'summary',title:'What to remember',cap:'Vertical scaling makes one machine bigger: simple, but it has a ceiling and is a single point of failure. Horizontal scaling adds machines behind a load balancer and needs stateless servers, but it can keep growing.',
+   set:{sum:[480,295,1,1]},dim:['sum']}
+ ]},
+{id:'cache',o3:{msg:[812,160]},name:'Episode 2 · Caching',sub:'Cache-aside, invalidation, stampedes, LRU',
+ actors:[
+  ['crowd','users',{cnt:'Priya'}],['box','app',{t:'App server',s:'menu service'}],['box','db',{t:'Database',s:'Postgres · on disk',cls:'db',meter:20}],
+  ['box','cache',{t:'Redis cache',s:'in memory',cls:'acc',w:190,h:84}],['pill','lat',{t:'response: 50 ms'}],['pill','msg',{t:'',cls:'acc'}],
+  ['pill','pc',{t:'biryani: ₹349',cls:'bad'}],['pill','pc2',{t:'biryani: ₹399',cls:'ok'}],['pill','hr',{t:'97% hit rate',cls:'ok'}],
+  ['pill','k1',{t:'menu:biryani-house'}],['pill','k2',{t:'menu:pizza-hub'}],['pill','k3',{t:'menu:dosa-corner'}],['pill','k4',{t:'menu:old-cafe'}],['pill','k5',{t:'menu:new-thali',cls:'acc'}],
+  ['card','sum',{w:820,h:370,lines:[['h','Caching in five lines',40],
+   ['li','1. Cache-aside: check Redis first; on a miss, read the database and save a copy with a TTL.',90],
+   ['li','2. Popular data is read again and again, so 90–99% of reads never reach the database.',126],
+   ['li','3. On every write, update the database and delete the cache key, so nobody sees stale data for long.',162],
+   ['li','4. Stop stampedes: one request rebuilds an expired key while others wait; add random jitter to TTLs.',198],
+   ['li','5. Memory is limited: an eviction policy such as LRU removes the least recently used keys.',234],
+   ['lb','Never cache what must be exact right now: payment status, stock at checkout.',290],
+   ['lg','Interview line: “Reads outnumber writes 100 to 1, so Redis cache-aside with a 10-minute TTL.”',326]]}]
+ ],
+ scenes:[
+  {tag:'start',title:'Without a cache',cap:'Priya opens a restaurant menu. The app server asks the database, the database reads from disk, and the answer comes back in about 50 milliseconds. Fine for one person.',
+   set:{users:[130,280,1,1],app:[430,280,1,1],db:[800,280,1,1],lat:[430,395,1,1]},seq:[['users','app','a',0],['app','db','a',.9],['db','app','g',1.9,1.1],['app','users','g',3.1]]},
+  {tag:'problem',title:'The database repeats itself',cap:'At dinner, 30,000 people open menus every second, mostly the same popular ones. The database does the exact same work again and again, hits 97% load, and responses slow to 2 seconds.',
+   txt:{users:'30,000 / second',lat:'response: 2,000 ms'},lcls:{lat:'bad'},meter:{db:97},shake:['db'],flows:[['users','app','a',120],['app','db','a',120],['db','app','b',380]]},
+  {tag:'idea',title:'Keep a copy in memory',cap:'The idea: keep a ready-made copy of popular menus in memory, close to the app. Memory answers in about 1 millisecond, roughly 50 times faster than the database. This store is the cache, here Redis.',
+   set:{cache:[620,120,1,1]},meter:{db:40},txt:{users:'Priya',lat:'response: 50 ms'},lcls:{lat:''}},
+  {tag:'fix',title:'Cache-aside: the first request',cap:'Cache-aside works like this. The app checks Redis first. The menu is not there yet, a miss, so it reads the database and then saves a copy in Redis with a time-to-live of 10 minutes.',
+   set:{msg:[620,48,1,1]},txt:{msg:'MISS → read DB → save copy'},seq:[['users','app','a',0],['app','cache','a',.9],['cache','app','b',1.7,.7],['app','db','a',2.5],['db','app','g',3.4],['app','cache','y',4.3],['app','users','g',5.1]]},
+  {tag:'result',title:'Every request after that: a hit',cap:'The next person asks for the same menu. This time Redis has it, a hit, and the answer comes back in 1 millisecond. The database is not touched at all.',
+   txt:{msg:'HIT → answered from memory',lat:'response: 1 ms'},lcls:{lat:'ok',msg:'ok'},seq:[['users','app','a',0],['app','cache','a',.9],['cache','app','g',1.6],['app','users','g',2.4]]},
+  {tag:'result',title:'Database load drops 30×',cap:'Back to 30,000 menus a second. About 97% are hits answered from Redis, and only 3 in 100 reach the database. Its load falls from 97% to 18%, and pages load in a couple of milliseconds.',
+   set:{msg:[620,48,1,0],hr:[800,395,1,1]},txt:{users:'30,000 / second',lat:'response: ~2 ms'},meter:{db:18},flows:[['users','app','a',120],['app','cache','g',130],['app','db','a',1100]]},
+  {tag:'problem',title:'Problem: stale data',cap:'The restaurant raises the biryani price from ₹349 to ₹399 and the database is updated. But Redis still holds the old copy, so customers keep seeing ₹349 for up to 10 minutes.',
+   set:{hr:[800,395,1,0],pc:[620,200,1,1],msg:[620,48,1,1]},txt:{msg:'cache still says ₹349',users:'Priya'},lcls:{msg:'bad'},lab:{db:['Database','biryani: ₹399 (new)']}},
+  {tag:'fix',title:'Fix: delete the key on every write',cap:'The fix is invalidation: whenever the menu changes, update the database and then delete that menu’s key from Redis. The next read misses once, loads ₹399 from the database, and the cache is correct again.',
+   set:{pc:[620,200,.6,0],pc2:[620,200,1,1]},txt:{msg:'DEL key → next read reloads'},lcls:{msg:'ok'},seq:[['app','db','a',0],['app','cache','b',1],['app','cache','a',2.4],['app','db','a',3.2],['db','app','g',4],['app','cache','y',4.8]]},
+  {tag:'problem',title:'Problem: cache stampede',cap:'A very popular key expires during the rush. In that instant 5,000 requests all miss together and all hit the database at once. The database spikes to 99% and might fall over.',
+   set:{pc2:[620,200,1,0]},txt:{msg:'hot key expired!',users:'5,000 at once'},lcls:{msg:'bad'},lab:{db:['Database','Postgres · on disk']},meter:{db:99},shake:['db'],flows:[['users','app','a',90],['app','db','b',90]]},
+  {tag:'fix',title:'Fix: one rebuilds, the rest wait',cap:'The fix: the first request takes a short lock and rebuilds the value, while the others wait 50 milliseconds and then read the fresh copy. Adding a little random jitter to TTLs also stops many keys expiring at the same moment.',
+   txt:{msg:'1 rebuilds · others wait 50 ms'},lcls:{msg:'ok'},meter:{db:22},flows:[['users','app','a',110],['app','cache','g',120]],seq:[['app','db','a',0],['db','app','g',.9],['app','cache','y',1.8]]},
+  {tag:'problem',title:'Problem: memory is limited',cap:'Memory is expensive, so the cache is small. Imagine it only has room for four menus, and all four slots are full. A new restaurant’s menu needs a place to go.',
+   set:{msg:[620,48,1,0],k1:[620,200,1,1],k2:[620,236,1,1],k3:[620,272,1,1],k4:[620,308,1,1],k5:[430,385,1,1],lat:[430,395,1,0]},txt:{users:'Priya'}},
+  {tag:'fix',title:'Fix: evict the least recently used',cap:'An eviction policy decides who leaves. With LRU, least recently used, the menu nobody has opened for the longest time, the old cafe, is removed. The new menu goes in at the top as the most recent.',
+   set:{k5:[620,200,1,1],k1:[620,236,1,1],k2:[620,272,1,1],k3:[620,308,1,1],k4:[800,420,.9,0]}},
+  {tag:'summary',title:'What to remember',cap:'Cache-aside for read-heavy data, delete keys on writes, protect against stampedes with a lock and jitter, and let LRU evict cold keys. Never cache values that must be exactly right at that moment.',
+   set:{sum:[480,290,1,1]},dim:['sum']}
+ ]},
+{id:'db',o3:{msg:[480,450]},name:'Episode 3 · Database scaling',sub:'Replicas, lag, failover, sharding',
+ actors:[
+  ['box','app',{t:'App servers',s:'20 of them'}],['box','pri',{t:'Database',s:'20k reads + 500 writes/s',cls:'db',w:200,meter:92}],
+  ['box','r1',{t:'Read replica 1',s:'copy of primary',cls:'db',w:200,meter:40}],['box','r2',{t:'Read replica 2',s:'copy of primary',cls:'db',w:200,meter:40}],
+  ['pill','msg',{t:'',cls:'acc'}],['box','router',{t:'Shard router',s:'hash(city_id)',cls:'acc'}],
+  ['box','sh1',{t:'Hyderabad shard',s:'primary + replicas',cls:'db',w:210,meter:35}],['box','sh2',{t:'Bengaluru shard',s:'primary + replicas',cls:'db',w:210,meter:35}],['box','sh3',{t:'Mumbai shard',s:'primary + replicas',cls:'db',w:210,meter:35}],
+  ['bars','bars',{}],
+  ['card','sum',{w:820,h:370,lines:[['h','Scaling a database, in order',40],
+   ['li','1. Indexes and a cache first: the cheapest wins.',90],['li','2. Scale up: a bigger machine with a standby copy in another zone.',124],
+   ['li','3. Read replicas spread reads; watch replication lag (read-your-writes).',158],['li','4. Automatic failover promotes a replica when the primary dies.',192],
+   ['li','5. Shard when writes outgrow one primary; pick the shard key your queries use.',226],['li','6. Use consistent hashing so adding a shard moves little data.',260],
+   ['lg','Interview line: “Primary + replicas now; shard by city_id with consistent hashing later.”',316]]}]
+ ],
+ scenes:[
+  {tag:'start',title:'One database does everything',cap:'All 20 app servers send every read and every write to a single database: 20,000 reads and 500 writes every second at dinner. It is running at 92% load and starting to slow down.',
+   set:{app:[170,280,1,1],pri:[480,280,1,1]},shake:['pri'],flows:[['app','pri','u',110],['app','pri','a',600]]},
+  {tag:'fix',title:'Fix: read replicas',cap:'Most traffic is reads. So we keep the main database, now called the primary, for writes, and copy every change to read replicas. Reads go to the replicas, and the primary’s load drops to 45%.',
+   set:{r1:[800,140,1,1],r2:[800,420,1,1]},lab:{pri:['Primary','all writes']},meter:{pri:45},flows:[['app','pri','a',500],['pri',['r1','r2'],'y',500],['app',['r1','r2'],'u',150]]},
+  {tag:'problem',title:'Problem: replication lag',cap:'Copying takes a moment. Priya places an order, which is written to the primary, then instantly opens My Orders. That read goes to replica 1, which is 200 milliseconds behind, and her order is missing.',
+   set:{msg:[480,140,1,1]},txt:{msg:'“where is my order?”'},lcls:{msg:'bad'},lab:{r1:['Read replica 1','200 ms behind']},seq:[['app','pri','a',0],['app','r1','b',.6],['pri','r1','y',1.2,2]]},
+  {tag:'fix',title:'Fix: read your own writes',cap:'The fix is called read-your-writes: for a few seconds after a user writes something, send that user’s reads to the primary. Everyone else still reads from replicas, and Priya always sees her own order.',
+   txt:{msg:'her reads → primary for 5 s'},lcls:{msg:'ok'},lab:{r1:['Read replica 1','copy of primary']},seq:[['app','pri','a',0],['app','pri','g',1],['pri','app','g',1.9]]},
+  {tag:'problem',title:'Problem: the primary dies',cap:'At 8:15 pm the machine running the primary fails. Reads still work from the replicas, but no one can place an order, because all writes go to the primary.',
+   set:{msg:[480,140,1,0]},cls:{pri:'dead'},flows:[['app','pri','b',220],['app',['r1','r2'],'u',220]]},
+  {tag:'fix',title:'Fix: automatic failover',cap:'With automatic failover, the system detects the dead primary within seconds and promotes replica 1 to be the new primary. App servers switch to it, and orders flow again in under a minute.',
+   set:{pri:[480,280,.8,0],r1:[480,280,1,1]},lab:{r1:['New primary','was replica 1']},meter:{r1:55},flows:[['app','r1','a',400],['r1','r2','y',500],['app','r2','u',220]]},
+  {tag:'problem',title:'Problem: too many writes',cap:'On IPL final night, orders spike to 5,000 writes a second. Replicas only help with reads; every write still has to go through one primary, and it is overloaded at 99%.',
+   set:{r2:[800,420,1,0]},lab:{r1:['Primary','5,000 writes/s']},meter:{r1:99},shake:['r1'],flows:[['app','r1','a',80]]},
+  {tag:'fix',title:'Fix: sharding',set3:{sh1:[690,110],sh2:[830,280],sh3:[690,450]},cap:'Sharding splits the data across several databases. A router sends each order to a shard based on the city: Hyderabad orders to one, Bengaluru to another, Mumbai to a third. Each handles a third of the writes.',
+   set:{r1:[480,280,.8,0],router:[480,280,1,1],sh1:[800,110,1,1],sh2:[800,280,1,1],sh3:[800,450,1,1]},flows:[['app','router','a',100],['router','sh1','a',300],['router','sh2','u',300],['router','sh3','y',300]]},
+  {tag:'problem',title:'Problem: adding a shard moves data',cap:'If shards are picked with hash % N, going from 3 to 4 shards changes the answer for about 75% of the data, which then has to be copied between databases. Consistent hashing moves only about 25%.',
+   set:{bars:[400,470,1,1]},flows:[['app','router','a',260]]},
+  {tag:'summary',title:'What to remember',cap:'Add indexes and a cache, scale up, add read replicas, handle lag and failover, then shard by the key your queries use, with consistent hashing. Go to the next step only when the previous one is not enough.',
+   set:{sum:[480,290,1,1]},dim:['sum']}
+ ]}
+];
+
+
+/* ================= EPISODES 2,3,6–12 ================= */
+const SUM=(title,lines,iv)=>['card','sum',{w:820,h:370,lines:[['h',title,40],...lines.map((t,i)=>['li',t,90+i*36]),['lg',iv,90+lines.length*36+18]]}];
+EPS.push(
+{id:'net',n:2,title:'Networking & APIs',sub:'DNS, HTTPS, REST, idempotency, gRPC, WebSockets',o3:{},
+ actors:[
+  ['box','app',{k:'phone',t:"Priya's phone",s:'Android app'}],['box','dns',{k:'dns',t:'DNS',s:'Route 53'}],['box','cdn',{k:'cdn',t:'CDN edge',s:'Hyderabad'}],
+  ['box','gw',{k:'gateway',t:'API gateway',s:'TLS ends here',cls:'acc'}],['box','svc',{k:'app',t:'Order service',s:'REST handler'}],
+  ['box','pricing',{k:'app',t:'Pricing service',s:'internal, gRPC'}],['box','ws',{k:'worker',t:'Tracking server',s:'WebSocket',label:'REAL-TIME'}],
+  ['box','rzp',{k:'ext',t:'Razorpay',s:'payment partner',cls:'ext',w:170}],['pill','msg',{t:'',cls:'acc'}],['pill','orders',{t:'',cls:'bad'}],
+  SUM('Networking & APIs in six lines',["1. DNS turns a name into an IP address; answers are cached.","2. TCP gives a reliable connection; TLS encrypts it (that's HTTPS).","3. A CDN serves static files from a data center near the user.","4. REST for public APIs, gRPC for fast calls between internal services.","5. Idempotency keys make retries safe: one tap, one order.","6. WebSockets or SSE for live updates; webhooks when partners call you."],"Interview line: “REST + idempotency keys for orders, WebSocket for tracking, gRPC inside.”")],
+ scenes:[
+  {tag:'start',title:'Priya taps “Place order”',cap:"Priya taps Place order. Her phone knows the name api.foodapp.in, but computers find each other by number, an IP address. So the first job is to look that number up.",set:{app:[130,280,1,1]}},
+  {tag:'idea',title:"DNS: the internet's phone book",cap:"The phone asks DNS, which replies with the IP address of our servers, like 13.235.4.8. The answer is cached for a few minutes, so most taps skip this step entirely.",set:{dns:[330,175,1,1]},seq:[['app','dns','a',0],['dns','app','g',.9]]},
+  {tag:'idea',title:'A secure line: TCP + TLS',cap:"The phone opens a TCP connection to that address, then a TLS handshake agrees on encryption keys. From now on every request is sealed, which is the S in HTTPS.",set:{gw:[540,280,1,1],msg:[600,120,1,1]},txt:{msg:'TCP + TLS handshake: keys agreed'},seq:[['app','gw','a',0],['gw','app','g',.9],['app','gw','a',1.8]]},
+  {tag:'fix',title:'Static files come from nearby',cap:"Photos, icons and app code don't need our servers. A CDN keeps copies in a data center in Hyderabad, a few milliseconds from Priya, instead of fetching them from Mumbai every time.",set:{cdn:[330,450,1,1],msg:[600,120,1,0]},flows:[['app','cdn','a',500],['cdn','app','g',300]]},
+  {tag:'idea',title:'A REST request',cap:"The order is a REST call: POST /v1/orders with the cart as JSON. The gateway checks her login token and passes it to the order service, which replies 201 Created.",set:{svc:[760,280,1,1],msg:[600,120,1,1]},txt:{msg:'POST /v1/orders → 201 Created'},lcls:{msg:'ok'},seq:[['app','gw','a',0],['gw','svc','a',.9],['svc','gw','g',1.8],['gw','app','g',2.7]]},
+  {tag:'problem',title:'Problem: the retry makes a second order',cap:"Her phone switches from Wi-Fi to 4G, the first response is lost, and the app times out. She taps again. Without protection the server creates a second order and charges her twice.",set:{orders:[760,390,1,1]},txt:{orders:'2 orders · charged twice!',msg:'timeout… she taps again'},lcls:{orders:'bad',msg:'bad'},seq:[['app','gw','a',0],['gw','svc','a',.8],['app','gw','b',1.8],['gw','svc','b',2.6]]},
+  {tag:'fix',title:'Fix: idempotency keys',cap:"Each order request carries a unique Idempotency-Key. The server stores the key with the first result, so a retry with the same key gets the same order back instead of creating a new one.",txt:{orders:'1 order · retry gets same answer',msg:'Idempotency-Key: 9f2c-…'},lcls:{orders:'ok',msg:'acc'},seq:[['app','gw','a',0],['gw','svc','a',.8],['app','gw','y',1.8],['gw','svc','y',2.6],['svc','gw','g',3.4]]},
+  {tag:'idea',title:'Inside the system: gRPC',cap:"Behind the gateway, services talk with gRPC: compact binary messages over HTTP/2 with a strict contract. The order service asks pricing for the final total, ₹349 including delivery.",set:{orders:[760,390,1,0],pricing:[760,450,1,1]},txt:{msg:'internal calls: gRPC (binary, typed)'},seq:[['svc','pricing','a',0],['pricing','svc','g',.9]]},
+  {tag:'problem',title:"Problem: “where's my rider?” every 2 s",cap:"To show the rider moving, the app could ask every 2 seconds. Most answers are “no change”. That drains Priya's battery and adds millions of useless requests across all users.",txt:{msg:'polling every 2 s…'},lcls:{msg:'bad'},flows:[['app','gw','a',260],['gw','app','b',520]]},
+  {tag:'fix',title:'Fix: one WebSocket that stays open',cap:"Instead, the app opens one WebSocket and keeps it open. The server pushes the rider's position every 4 seconds, only when it changes. One connection replaces thousands of requests.",set:{ws:[540,450,1,1]},txt:{msg:'one open line, server pushes'},lcls:{msg:'ok'},flows:[['ws','app','g',1000]]},
+  {tag:'idea',title:'A partner calls us: webhooks',cap:"When the UPI payment succeeds, Razorpay calls a URL on our side, a webhook, to tell us. We verify its signature before trusting it, then mark the order as paid.",set:{rzp:[900,130,1,1]},txt:{msg:'webhook: payment.captured ✓'},lcls:{msg:'ok'},seq:[['rzp','svc','y',0,1.1]]},
+  {tag:'summary',title:'What to remember',cap:"DNS finds the server, TLS secures the line, the CDN serves files nearby, REST and gRPC carry requests, idempotency keys make retries safe, and WebSockets and webhooks handle real-time and partner events.",set:{sum:[480,290,1,1]},dim:['sum']}
+ ]},
+{id:'lb',n:3,title:'Load balancing',sub:'Algorithms, health checks, L4 vs L7, redundancy',o3:{},
+ actors:[
+  ['crowd','users',{cnt:'Dinner rush'}],['box','LB',{t:'Load balancer',s:'one address for all',cls:'acc'}],
+  ['box','S1',{t:'Server 1',s:'8 CPU · fast disk',meter:30}],['box','S2',{t:'Server 2',s:'8 CPU · fast disk',meter:30}],['box','S3',{t:'Server 3',s:'slow disk',meter:30}],
+  ['box','S4',{t:'Menu pod',s:'serves /v1/menu',meter:30}],['box','LB2',{k:'lb',t:'Standby balancer',s:'takes over the IP',cls:'acc'}],['pill','msg',{t:'',cls:'acc'}],
+  SUM('Load balancing in six lines',["1. A load balancer gives users one address and spreads requests across servers.","2. Round robin is simple; least connections handles uneven request times.","3. Health checks remove failing servers automatically.","4. Layer 7 routes by URL and headers; layer 4 by address and port.","5. The balancer itself must be redundant: active-standby or a managed service.","6. Tools: AWS ALB / NLB, Nginx, HAProxy, Envoy, Kubernetes Services."],"Interview line: “Redundant L7 balancer, least connections, health checks, connection draining.”")],
+ scenes:[
+  {tag:'start',title:'Which server gets this request?',cap:"Thousands of dinner orders arrive at one address: the load balancer. Behind it are three copies of the order service. For every single request it has to pick one.",set:{users:[140,280,1,1],LB:[380,280,1,1],S1:[630,145,1,1],S2:[800,290,1,1],S3:[630,445,1,1]},flows:[['users','LB','a',220],['LB',['S1','S2','S3'],'a',220]]},
+  {tag:'problem',title:'Problem: round robin ignores busy servers',cap:"Round robin sends requests in strict turn: 1, 2, 3, 1, 2, 3. But server 3 has a slow disk, so its requests take three times longer. It gets the same share anyway, piles up work, and its users wait.",set:{msg:[330,120,1,1]},txt:{msg:'round robin: 1, 2, 3, 1, 2, 3…'},lcls:{msg:'bad'},meter:{S1:35,S2:35,S3:95},shake:['S3'],flows:[['users','LB','a',220],['LB',['S1','S2','S3'],'a',220]]},
+  {tag:'fix',title:'Fix: least connections',cap:"With least connections, each new request goes to the server with the fewest requests still in progress. The slow server naturally receives fewer, and the load evens out.",txt:{msg:'least connections wins'},lcls:{msg:'ok'},meter:{S1:55,S2:55,S3:55},flows:[['users','LB','a',220],['LB',['S1','S2','S1','S2','S3'],'a',160]]},
+  {tag:'idea',title:'Health checks',cap:"Every few seconds the balancer calls a tiny /healthz endpoint on each server. Healthy servers answer “OK”. This time, server 3 doesn't answer at all.",txt:{msg:'GET /healthz every 5 s'},lcls:{msg:'acc'},seq:[['LB','S1','y',0],['LB','S2','y',0],['LB','S3','y',0],['S1','LB','g',.9],['S2','LB','g',.9]]},
+  {tag:'result',title:'A sick server is removed',cap:"After two failed checks, server 3 is taken out of rotation and traffic flows only to healthy servers while it restarts. During deploys, connections drain for 30 seconds so nothing is cut off.",cls:{S3:'dead'},txt:{msg:'2 failed checks → removed'},lcls:{msg:'ok'},meter:{S1:62,S2:62},flows:[['users','LB','a',220],['LB',['S1','S2'],'a',220]]},
+  {tag:'idea',title:'Layer 7: route by URL',cap:"A layer 7 balancer reads each request: order calls go to order servers, menu calls go to menu servers, so each pool scales on its own. A layer 4 balancer only sees addresses and ports, which is faster for raw connections.",set:{S3:[620,440,1,0],S4:[620,440,1,1]},cls:{S3:''},txt:{msg:'/orders → orders · /menu → menu'},lcls:{msg:'acc'},flows:[['users','LB','a',220],['LB',['S1','S2'],'a',300],['LB','S4','u',420]]},
+  {tag:'problem',title:'Problem: the balancer is a single point',cap:"Now everything depends on one load balancer. If that one machine dies, no request reaches any server, no matter how many servers we have.",cls:{LB:'dead'},txt:{msg:'the balancer itself crashed'},lcls:{msg:'bad'},flows:[['users','LB','b',260]]},
+  {tag:'fix',title:'Fix: a standby or managed balancer',cap:"Run balancers in pairs. A standby watches the active one and takes over its IP address within seconds. Cloud balancers such as AWS ALB do this for you across availability zones.",set:{LB2:[380,455,1,1]},txt:{msg:'standby took over the IP'},lcls:{msg:'ok'},flows:[['users','LB2','a',220],['LB2',['S1','S2','S4'],'a',220]]},
+  {tag:'summary',title:'What to remember',cap:"Pick servers with least connections, remove sick ones with health checks, route by URL at layer 7, and never let the balancer itself be a single point of failure.",set:{sum:[480,290,1,1]},dim:['sum']}
+ ]},
+{id:'cons',n:6,title:'Consistency & sagas',sub:'Quorums, split brain, sagas, idempotency',o3:{orch:[640,150],msg:[760,505]},
+ actors:[
+  ['box','cl',{k:'app',t:'Order service',s:'writes x = 5'}],
+  ['box','nA',{k:'db',label:'COPY A',t:'Copy A',s:'replica',cls:'db'}],['box','nB',{k:'db',label:'COPY B',t:'Copy B',s:'replica',cls:'db'}],['box','nC',{k:'db',label:'COPY C',t:'Copy C',s:'replica',cls:'db'}],
+  ['box','orch',{k:'flow',t:'Order workflow',s:'remembers every step',cls:'acc'}],
+  ['box','n1',{k:'app',t:'1 · Create order',s:'status PENDING'}],['box','n2',{k:'ext',t:'2 · Charge ₹349',s:'Razorpay',cls:'ext'}],
+  ['box','n3',{k:'phone',t:'3 · Restaurant accepts',s:'3-minute timer',w:200}],['box','n4',{k:'worker',t:'4 · Assign rider',s:'dispatch'}],
+  ['box','c2',{k:'ext',t:'Undo · refund ₹349',s:'compensates step 2',cls:'acc'}],['box','c1',{k:'app',t:'Undo · cancel order',s:'and notify Priya',cls:'acc'}],
+  ['pill','msg',{t:'',cls:'acc'}],
+  SUM('Consistency in six lines',["1. Keep copies on several machines; a quorum (R + W > N) keeps reads current.","2. Strong consistency for money and stock; eventual for likes and feeds.","3. Raft and Paxos elect a leader by majority, which prevents split brain.","4. Across services, use a saga: local steps plus compensating undo steps.","5. Make every step idempotent, because retries will happen.","6. Tools: etcd, ZooKeeper, Temporal, Step Functions, CockroachDB, Spanner."],"Interview line: “Orchestrated saga with idempotent steps; refunds as compensation.”")],
+ scenes:[
+  {tag:'start',title:'Three copies of the same data',cap:"Important data is stored on three machines, so losing one never loses data. But now every write has to reach all three, and for a moment they can disagree.",set:{cl:[160,280,1,1],nA:[560,120,1,1],nB:[790,280,1,1],nC:[560,440,1,1]}},
+  {tag:'idea',title:'A write goes to all three',cap:"The order service writes x = 5. The write goes to all three copies at once. Copy C sits on a busy machine and is slow to answer.",seq:[['cl','nA','a',0],['cl','nB','a',0],['cl','nC','a',0,2.4]]},
+  {tag:'fix',title:'Quorum: two answers are enough',cap:"We don't wait for everyone. As soon as two of the three copies confirm (W = 2), the write counts as done. Copy C catches up a moment later.",set:{msg:[330,130,1,1]},txt:{msg:'W = 2 of N = 3 → success'},lcls:{msg:'ok'},lab:{nC:['Copy C','slow, catches up later']},seq:[['cl','nA','a',0],['cl','nB','a',0],['cl','nC','a',0,2.4],['nA','cl','g',1],['nB','cl','g',1.1]]},
+  {tag:'idea',title:'Reads ask two copies too',cap:"A read also asks two copies (R = 2) and keeps the newest value. Because 2 + 2 is more than 3, every read overlaps with at least one copy that has the latest write.",txt:{msg:'R + W > N → always fresh'},lcls:{msg:'acc'},seq:[['cl','nB','a',0],['cl','nC','a',0],['nB','cl','g',.9],['nC','cl','y',1]]},
+  {tag:'problem',title:'Problem: split brain',cap:"The network between machines breaks. Copy C can't see the others, and both sides believe they are in charge. If both accept writes, the data splits into two conflicting versions.",txt:{msg:'network split!'},lcls:{msg:'bad'},lab:{nA:['Copy A','“I am the leader”'],nC:['Copy C','“No, I am the leader”']},shake:['nA','nC']},
+  {tag:'fix',title:'Fix: only a majority can lead',cap:"Consensus protocols like Raft allow a leader only with a majority of votes. A and B together are 2 of 3, so they carry on. C alone is a minority and refuses writes until the network heals.",cls:{nC:'dead'},lab:{nA:['Copy A','leader (has majority)'],nC:['Copy C','minority: steps down']},txt:{msg:'majority rules: 2 of 3'},lcls:{msg:'ok'},flows:[['cl','nA','a',600],['nA','nB','y',600]]},
+  {tag:'idea',title:'Many services, one business step',cap:"Placing an order touches four services, each with its own database: create the order, charge the card, the restaurant accepts, assign a rider. No single database transaction can cover them all.",set:{cl:[160,280,1,0],nA:[560,120,1,0],nB:[790,280,1,0],nC:[560,440,1,0],msg:[820,120,1,0],orch:[460,150,1,1],n1:[130,300,1,1],n2:[350,300,1,1],n3:[570,300,1,1],n4:[800,300,1,1]},cls:{nC:''},seq:[['n1','n2','g',0],['n2','n3','g',.9],['n3','n4','g',1.8]]},
+  {tag:'problem',title:'Problem: step 3 fails after paying',cap:"The restaurant's tablet is offline and never accepts. But Priya has already been charged ₹349. We can't simply roll back, because the payment happened in a different system.",cls:{n3:'dead'},lab:{n3:['3 · Restaurant accepts','no reply in 3 min']},seq:[['n1','n2','g',0],['n2','n3','b',.9]]},
+  {tag:'fix',title:'Fix: a saga with undo steps',cap:"A saga gives every step an undo action. The workflow runs them in reverse: refund the ₹349, then cancel the order and tell Priya. The workflow engine records progress, so a crash can't leave it half done.",set:{c2:[350,460,1,1],c1:[130,460,1,1]},seq:[['n3','c2','b',0],['c2','c1','b',1]]},
+  {tag:'fix',title:'Every step must be safe to repeat',cap:"If a server crashes mid-step, the workflow retries it. So every step is idempotent: charging twice with the same order ID still charges once, and refunding twice still refunds once.",set:{msg:[820,120,1,1]},txt:{msg:'every step safe to retry'},lcls:{msg:'ok'},seq:[['orch','n2','y',0],['orch','n2','y',.8],['n2','orch','g',1.7]]},
+  {tag:'summary',title:'What to remember',cap:"Quorums keep copies in step, majorities prevent split brain, and sagas with idempotent steps and undo actions keep many services consistent without one big transaction.",set:{sum:[480,290,1,1]},dim:['sum']}
+ ]},
+{id:'queue',n:7,title:'Queues & Kafka',sub:'Async events, outbox, DLQ, absorbing spikes',o3:{},
+ actors:[
+  ['box','order',{k:'app',t:'Order service',s:'just placed #48213',cls:'acc'}],['box','kafka',{k:'queue',t:'Kafka',s:'order-events topic',cls:'okb',meter:10}],
+  ['box','notify',{k:'worker',t:'Notifications',s:'push to Priya'}],['box','disp',{k:'worker',t:'Dispatch',s:'find a rider'}],['box','ana',{k:'worker',t:'Analytics',s:'reports'}],
+  ['box','pg',{k:'db',label:'DATABASE',t:'Postgres',s:'orders',cls:'db'}],['box','relay',{k:'worker',t:'Outbox relay',s:'Debezium'}],
+  ['box','dlq',{k:'queue',t:'Dead-letter topic',s:'after 3 retries',cls:'acc'}],['pill','msg',{t:'',cls:'acc'}],
+  SUM('Queues in six lines',["1. Do the essential work now; publish an event for everything else.","2. Kafka keeps events for days; each consumer group reads at its own pace.","3. Save a record and its event together with a transactional outbox.","4. Delivery is at-least-once, so make consumers idempotent.","5. Retry with backoff, then move poison messages to a dead-letter queue.","6. Tools: Kafka, RabbitMQ, SQS + SNS, BullMQ, Celery, Debezium."],"Interview line: “Synchronous order; everything else async via Kafka, with an outbox and a DLQ.”")],
+ scenes:[
+  {tag:'problem',title:'Problem: doing everything at once',cap:"After saving an order, the order service calls notifications, dispatch and analytics one by one and waits for each. Analytics is slow today, so every checkout is slow too. If it fails, the order fails.",set:{order:[140,280,1,1],notify:[700,120,1,1],disp:[860,280,1,1],ana:[700,440,1,1],msg:[440,130,1,1]},lab:{ana:['Analytics','slow today']},txt:{msg:'checkout waits for the slowest'},lcls:{msg:'bad'},shake:['ana'],seq:[['order','notify','a',0],['order','disp','a',.3],['order','ana','a',.6,2.2]]},
+  {tag:'fix',title:'Fix: publish an event and move on',cap:"Now the order service writes one event, OrderPlaced, to Kafka and immediately answers Priya. Each team's service reads the event on its own. Nobody waits for anybody.",set:{kafka:[440,280,1,1]},lab:{ana:['Analytics','reports']},txt:{msg:'publish once, move on'},lcls:{msg:'ok'},flows:[['order','kafka','a',500],['kafka',['notify','disp','ana'],'g',300]]},
+  {tag:'result',title:'One consumer down, nothing lost',cap:"The notification service goes down for 10 minutes. Dispatch and analytics keep working. Notification events simply wait in Kafka, which keeps them for days.",cls:{notify:'dead'},lab:{notify:['Notifications','down for 10 min']},meter:{kafka:70},txt:{msg:'events wait safely in the topic'},lcls:{msg:'acc'},flows:[['order','kafka','a',260],['kafka',['disp','ana'],'g',300]]},
+  {tag:'result',title:'It catches up where it stopped',cap:"When it comes back, it reads from its saved position, called an offset, and works through the backlog. Every notification is still sent, just a few minutes late.",cls:{notify:''},lab:{notify:['Notifications','catching up']},meter:{kafka:20},txt:{msg:'resume from saved offset'},lcls:{msg:'ok'},flows:[['kafka','notify','g',120],['kafka',['disp','ana'],'g',400],['order','kafka','a',500]]},
+  {tag:'problem',title:'Problem: the event that never got sent',cap:"The order service saves the order in Postgres, then crashes a split second before publishing the event. The order exists, but no rider is ever assigned and Priya never hears back.",set:{pg:[110,450,1,1]},lab:{notify:['Notifications','push to Priya']},txt:{msg:'saved, then crashed before publish'},lcls:{msg:'bad'},seq:[['order','pg','a',0],['order','kafka','b',1.2]]},
+  {tag:'fix',title:'Fix: the transactional outbox',cap:"The order and its event are saved in one database transaction, the event in an outbox table. A relay such as Debezium reads new outbox rows and publishes them. If anything crashes, the relay simply retries.",set:{relay:[330,450,1,1]},lab:{pg:['Postgres','order + outbox row']},txt:{msg:'save both in one transaction'},lcls:{msg:'ok'},seq:[['order','pg','a',0],['pg','relay','a',1],['relay','kafka','g',2]]},
+  {tag:'problem',title:'Problem: one broken event blocks the line',cap:"A malformed event makes the analytics consumer crash every time it reads it. It retries forever, and every event queued behind it is stuck.",set:{pg:[110,450,1,0],relay:[330,450,1,0],dlq:[440,455,1,1]},txt:{msg:'one bad event keeps failing'},lcls:{msg:'bad'},shake:['ana'],seq:[['kafka','ana','b',0],['kafka','ana','b',1],['kafka','ana','b',2]]},
+  {tag:'fix',title:'Fix: retries, then a dead-letter queue',cap:"Retry a few times with growing waits, then move the event to a dead-letter topic and carry on. An engineer is alerted to inspect it. Consumers are idempotent too, because Kafka may deliver an event twice.",txt:{msg:'3 tries → dead-letter topic'},lcls:{msg:'ok'},seq:[['kafka','ana','b',0],['ana','dlq','b',1]],flows:[['kafka',['notify','disp'],'g',400]]},
+  {tag:'result',title:'Spikes are absorbed',cap:"On IPL final night orders jump tenfold. The topic grows, consumers work through it at a steady pace, and autoscaling adds workers when the backlog grows. Nothing crashes and nothing is lost.",lab:{order:['Order service','IPL final: 10× orders']},meter:{kafka:85},txt:{msg:'the queue absorbs the spike'},lcls:{msg:'ok'},flows:[['order','kafka','a',90],['kafka',['notify','disp','ana'],'g',260]]},
+  {tag:'summary',title:'What to remember',cap:"Answer the user fast and push the rest through a queue. Use an outbox so events are never lost, idempotent consumers because duplicates happen, and a dead-letter queue for messages that keep failing.",set:{sum:[480,290,1,1]},dim:['sum']}
+ ]},
+{id:'arch',n:8,title:'Architecture',sub:'Monolith vs microservices, gateway, events',o3:{},
+ actors:[
+  ['crowd','users',{cnt:'Customers'}],['box','mono',{k:'app',t:'Monolith',s:'users · orders · payments',w:250,meter:40}],
+  ['box','gw',{k:'gateway',t:'API gateway',s:'one front door',cls:'acc'}],['box','sU',{k:'app',t:'User service',s:'owns users DB'}],
+  ['box','sO',{k:'app',t:'Order service',s:'owns orders DB'}],['box','sP',{k:'app',t:'Payment service',s:'owns payments DB'}],
+  ['box','sN',{k:'worker',t:'Notifications',s:'owns templates'}],['box','bus',{k:'queue',t:'Event bus',s:'Kafka',cls:'okb'}],['pill','msg',{t:'',cls:'acc'}],
+  SUM('Architecture in six lines',["1. Start with a monolith (ideally modular); split when teams or scale demand it.","2. Split by business capability; each service owns its own data.","3. An API gateway handles auth, rate limits and routing in one place.","4. gRPC when you need an answer now; events for everything else.","5. Protect every call with timeouts and fallbacks so failures don't spread.","6. Tools: Docker, Kubernetes, Istio, Kong, Kafka, Terraform."],"Interview line: “Services by domain, each with its own DB; gRPC for queries, Kafka for events.”")],
+ scenes:[
+  {tag:'start',title:'Day one: one app does everything',cap:"Most products start as a monolith: one codebase and one database with every feature inside. It is fast to build, easy to test and simple to deploy. For a small team it is the right choice.",set:{users:[140,280,1,1],mono:[520,280,1,1]},flows:[['users','mono','a',400]]},
+  {tag:'problem',title:"Problem: one bug takes everyone down",cap:"Years later, 300 engineers work in the same codebase. Every release waits on everyone, a bug in offers can crash checkout, and the whole app must scale together even when only search is busy.",set:{msg:[840,120,1,1]},meter:{mono:96},cls:{mono:'dead'},txt:{msg:'1 bug → whole app down'},lcls:{msg:'bad'},flows:[['users','mono','b',300]]},
+  {tag:'fix',title:'Fix: split by business area',cap:"We split the system along business lines: users, orders, payments, notifications. Each service is owned by one team, has its own database, and can be released on its own schedule.",set:{mono:[520,280,.8,0],gw:[380,280,1,1],sU:[620,120,1,1],sO:[800,280,1,1],sP:[600,450,1,1],sN:[810,460,1,0]},cls:{mono:''},txt:{msg:'split by business area'},lcls:{msg:'ok'},flows:[['users','gw','a',260],['gw',['sU','sO','sP'],'a',260]]},
+  {tag:'idea',title:'One front door: the API gateway',cap:"Clients still see a single address. The API gateway checks login tokens and rate limits once, then routes each request to the service that owns it.",txt:{msg:'gateway: auth + routing'},lcls:{msg:'acc'},flows:[['users','gw','a',260],['gw',['sU','sO','sP'],'a',260]]},
+  {tag:'idea',title:'Two ways to talk',cap:"When the order service needs an answer right now, such as charging the card, it calls payments directly with gRPC. For news like “order placed”, it publishes an event, and notifications reacts on its own.",set:{bus:[380,455,1,1],sN:[810,460,1,1]},txt:{msg:'gRPC for answers, events for news'},seq:[['gw','sO','a',0],['sO','sP','a',.9],['sP','sO','g',1.8],['sO','bus','g',2.6],['bus','sN','g',3.5]]},
+  {tag:'problem',title:'Problem: one slow service slows the rest',cap:"The payment service becomes slow. The order service waits on it, its threads fill up, and soon checkout is slow for everyone. In a distributed system, one sick service can spread.",lab:{sP:['Payment service','responding in 30 s']},txt:{msg:'checkout waits on payments'},lcls:{msg:'bad'},shake:['sP'],seq:[['gw','sO','a',0],['sO','sP','b',.8,2.5]]},
+  {tag:'fix',title:'Fix: timeouts, fallbacks, events',cap:"Every call gets a strict timeout and a fallback, such as “payment pending, we'll confirm shortly”. Anything that doesn't need an instant answer goes through events. Episode 9 covers these patterns.",lab:{sP:['Payment service','300 ms timeout + fallback']},txt:{msg:'timeout + fallback → keep going'},lcls:{msg:'ok'},seq:[['gw','sO','a',0],['sO','sP','a',.8],['sO','gw','g',1.6]]},
+  {tag:'result',title:'Each service scales on its own',cap:"At dinner the order service runs 40 copies while the user service needs only 3. With a monolith, everything would have to scale together and we would pay for it all.",set:{sO:[800,280,1.3,1],sU:[620,120,.8,1]},lab:{sO:['Order service','×40 pods at dinner'],sU:['User service','×3 pods']},txt:{msg:'scale only what is busy'},flows:[['users','gw','a',180],['gw',['sO','sO','sO','sU'],'a',180]]},
+  {tag:'summary',title:'What to remember',cap:"Start simple with a monolith. Split by business area when teams and scale demand it, give each service its own data, put a gateway in front, and protect every call so one slow service can't drag down the rest.",set:{sum:[480,290,1,1]},dim:['sum']}
+ ]},
+{id:'res',n:9,title:'Resilience',sub:'Rate limits, shedding, circuit breakers, retries',o3:{},
+ actors:[
+  ['crowd','users',{cnt:'Cricket fans'}],['crowd','bots',{cnt:'Bots'}],['box','gw',{k:'gateway',t:'API gateway',s:'token bucket per user',cls:'acc'}],
+  ['box','order',{k:'app',t:'Order service',s:'checkout',meter:50}],['box','reco',{k:'app',t:'Recommendations',s:'nice to have'}],
+  ['box','pr',{k:'router',t:'Payment router',s:'circuit breaker',cls:'acc',w:180}],['box','rzp',{k:'ext',t:'Razorpay',s:'primary gateway',cls:'ext',w:160}],
+  ['box','backup',{k:'ext',t:'Backup gateway',s:'secondary',cls:'ext',w:160}],['pill','msg',{t:'',cls:'acc'}],
+  SUM('Resilience in six lines',["1. Rate limit at the edge with token buckets; return 429 with Retry-After.","2. Shed nice-to-have features first so the core keeps working.","3. Circuit breakers stop calls to a failing dependency and use a fallback.","4. Every call gets a timeout; retries use backoff, jitter and a budget.","5. Plan for disaster: replicas in another region, tested failover (RPO / RTO).","6. Tools: Kong, Envoy, Resilience4j, Istio, Unleash, AWS WAF, Chaos Monkey."],"Interview line: “Token-bucket limits, circuit breakers with fallback, backoff with jitter.”")],
+ scenes:[
+  {tag:'start',title:'IPL final, last over: 10× traffic',cap:"Millions of fans order food at the same moment and traffic jumps tenfold within seconds. The system has to protect itself, keep the important parts working, and keep taking payments.",set:{users:[130,200,1,1],gw:[340,300,1,1],order:[540,180,1,1]},meter:{order:70},flows:[['users','gw','a',110],['gw','order','a',160]]},
+  {tag:'fix',title:'Rate limits stop abusive traffic',cap:"Bots hammer the offers API 50 times a second. Each user and IP has a token bucket at the gateway: tokens refill steadily and each request spends one. Bots run out and get 429 Too Many Requests.",set:{bots:[130,450,1,1],msg:[340,130,1,1]},txt:{msg:'bots get 429 Too Many Requests'},lcls:{msg:'ok'},flows:[['users','gw','a',160],['bots','gw','b',90],['gw','bots','b',300],['gw','order','a',200]]},
+  {tag:'fix',title:'Load shedding: drop the extras',cap:"A feature flag switches off recommendations and other extras. Their capacity goes to search, menus and checkout, the parts that matter most tonight.",set:{reco:[540,450,1,1]},cls:{reco:'dead'},lab:{reco:['Recommendations','switched off by flag']},meter:{order:55},txt:{msg:'shed nice-to-haves first'},flows:[['users','gw','a',160],['gw','order','a',200]]},
+  {tag:'problem',title:'Problem: the payment gateway is failing',cap:"Razorpay is struggling under its own load, and payment calls start timing out after 30 seconds. Users stare at a spinner while our servers fill up with waiting requests.",set:{pr:[720,300,1,1],rzp:[870,130,1,1]},cls:{rzp:'dead'},txt:{msg:'payments timing out (30 s each)'},lcls:{msg:'bad'},flows:[['gw','order','a',220],['order','pr','a',220],['pr','rzp','b',220]]},
+  {tag:'fix',title:'Fix: the circuit breaker opens',cap:"After 30% of calls fail within 20 seconds, the circuit breaker opens. It stops calling Razorpay entirely and sends new payments to a backup gateway. Users get answers in seconds instead of timeouts.",set:{backup:[870,450,1,1]},lab:{pr:['Payment router','breaker OPEN']},txt:{msg:'breaker open → backup gateway'},lcls:{msg:'ok'},flows:[['order','pr','a',220],['pr','backup','g',220]]},
+  {tag:'result',title:'Half-open: test, then recover',cap:"After 30 seconds the breaker lets one test payment through to Razorpay. It succeeds, so the breaker closes and traffic returns to the primary gateway.",cls:{rzp:''},lab:{pr:['Payment router','half-open → closed']},txt:{msg:'1 test call succeeded'},seq:[['pr','rzp','y',0],['rzp','pr','g',1]],flows:[['order','pr','a',300]]},
+  {tag:'problem',title:'Problem: retries make it worse',cap:"When something slows down, every layer retries. Three retries at each of four layers turns one tap into 81 calls on the deepest service, and the service that was struggling collapses.",txt:{msg:'3 retries × 4 layers = 81 calls'},lcls:{msg:'bad'},shake:['pr'],flows:[['order','pr','b',70]]},
+  {tag:'fix',title:'Fix: back off, add jitter, cap retries',cap:"Retry at one layer only, wait longer each time (100, 200, 400 ms) with random jitter so clients don't retry in sync, and cap retries at about 10% extra traffic. Only retry calls that are safe to repeat.",txt:{msg:'backoff + jitter + retry budget'},lcls:{msg:'ok'},flows:[['order','pr','a',450],['pr','rzp','g',450]]},
+  {tag:'summary',title:'What to remember',cap:"Limit abusive traffic at the edge, shed extras first, open circuit breakers on failing dependencies, and retry gently with backoff, jitter and a budget.",set:{sum:[480,290,1,1]},dim:['sum']}
+ ]},
+{id:'store',n:10,title:'Storage, search & geo',sub:'S3 uploads, CDN, search index, nearby riders',o3:{},
+ actors:[
+  ['box','partner',{k:'phone',t:'Restaurant app',s:'new dish photo'}],['box','menu',{k:'app',t:'Menu service',s:'signs upload URL'}],
+  ['box','s3',{k:'storage',t:'Object storage',s:'Amazon S3',cls:'db'}],['box','cdn',{k:'cdn',t:'CDN',s:'served in Hyderabad'}],
+  ['box','pg',{k:'db',label:'DATABASE',t:'Postgres',s:'restaurants + dishes',cls:'db',meter:30}],['box','cdc',{k:'worker',t:'Change capture',s:'Debezium'}],
+  ['box','es',{k:'search',t:'Search index',s:'Elasticsearch',cls:'db'}],['box','api',{k:'app',t:'Search API',s:'“biriyani” near me'}],
+  ['crowd','riders',{cnt:'160,000 riders'}],['box','loc',{k:'app',t:'Location service',s:'GPS every 4 s'}],
+  ['box','geo',{k:'db',label:'IN-MEMORY',t:'Redis GEO',s:'H3 cell → riders',cls:'db'}],['box','disp',{k:'worker',t:'Dispatch',s:'nearest free rider',meter:30}],['pill','msg',{t:'',cls:'acc'}],
+  SUM('Storage, search & geo in six lines',["1. Files go to object storage (S3); the database stores only the URL.","2. Presigned URLs let clients upload directly, keeping servers free.","3. Resize images once and serve them through a CDN.","4. Search with an inverted index (Elasticsearch), fed by change-data-capture.","5. Find nearby things with geo cells: geohash, H3 or Redis GEO.","6. Bloom filters, HyperLogLog and tries answer special questions cheaply."],"Interview line: “Presigned uploads to S3 + CDN, Elasticsearch via CDC, H3 cells in Redis.”")],
+ scenes:[
+  {tag:'problem',title:'Problem: big files through our servers',cap:"A restaurant uploads a 4 MB photo for every dish. If every file passes through our app servers and into the database, they waste memory and bandwidth, and database backups become huge.",set:{partner:[140,300,1,1],menu:[380,170,1,1],msg:[600,460,1,1]},txt:{msg:'4 MB photos through our servers'},lcls:{msg:'bad'},shake:['menu'],seq:[['partner','menu','a',0,1.6]]},
+  {tag:'fix',title:'Fix, step 1: ask for permission',cap:"Instead, the app asks the menu service for permission. The service checks the restaurant owns this dish and returns a presigned URL: a link that allows uploading one file to S3 for 5 minutes.",set:{s3:[600,300,1,1]},txt:{msg:'presigned URL, valid 5 min'},lcls:{msg:'ok'},seq:[['partner','menu','a',0],['menu','partner','g',.9]]},
+  {tag:'fix',title:'Fix, step 2: upload straight to S3',cap:"The phone uploads the photo directly to object storage. Our servers never touch the bytes. S3 stores it cheaply and durably, and the database keeps only the file's URL.",txt:{msg:'upload goes straight to S3'},seq:[['partner','s3','a',0,1.6]]},
+  {tag:'result',title:'Serve it from a CDN',cap:"The photo is resized once into small, medium and large WebP versions. A CDN copies them to servers near customers, so menus load fast everywhere and S3 is rarely read.",set:{cdn:[830,300,1,1]},txt:{msg:'resized once, cached near users'},flows:[['s3','cdn','g',600]]},
+  {tag:'problem',title:'Problem: search with SQL is slow',cap:"Priya types “biriyani”, with a typo. A SQL LIKE query has to scan every dish row, can't handle the typo, and can't rank results by relevance. At dinner the database chokes.",set:{partner:[140,300,1,0],menu:[380,170,1,0],s3:[600,300,1,0],cdn:[830,300,1,0],pg:[140,300,1,1],api:[830,300,1,1],msg:[480,460,1,1]},meter:{pg:96},shake:['pg'],txt:{msg:"LIKE '%biryani%' scans every row"},lcls:{msg:'bad'},seq:[['api','pg','b',0,1.8]]},
+  {tag:'fix',title:'Fix: a search index',cap:"A search engine like Elasticsearch keeps an inverted index: for each word, the list of dishes containing it. Fuzzy matching handles the typo, and changes stream in from Postgres within seconds.",set:{cdc:[370,300,1,1],es:[600,300,1,1]},meter:{pg:30},txt:{msg:'“biryani” → dishes 4, 9, 22, 31'},lcls:{msg:'ok'},flows:[['pg','cdc','a',900],['cdc','es','a',900]],seq:[['api','es','a',0],['es','api','g',.9]]},
+  {tag:'problem',title:'Problem: who is the nearest rider?',cap:"To assign Priya's order, dispatch needs the closest free rider. Checking the distance to all 160,000 riders for every order, hundreds of times a second, is far too slow.",set:{pg:[140,300,1,0],cdc:[370,300,1,0],es:[600,300,1,0],api:[830,300,1,0],riders:[140,300,1,1],disp:[830,300,1,1]},meter:{disp:97},shake:['disp'],txt:{msg:'160,000 distance checks per order'},lcls:{msg:'bad'}},
+  {tag:'fix',title:'Fix: split the map into cells',cap:"The map is divided into small hexagon cells (H3). Each rider is stored under their cell in Redis. Dispatch looks only in the restaurant's cell and the 6 around it: a few dozen riders instead of 160,000.",set:{loc:[370,300,1,1],geo:[600,300,1,1]},meter:{disp:25},txt:{msg:'look in 7 nearby hexagons only'},lcls:{msg:'ok'},flows:[['riders','loc','u',300],['loc','geo','u',300]],seq:[['disp','geo','a',0],['geo','disp','g',.9]]},
+  {tag:'summary',title:'What to remember',cap:"Put files in object storage and serve them through a CDN, search with an inverted index fed by change capture, and find nearby things with geo cells instead of checking every distance.",set:{sum:[480,290,1,1]},dim:['sum']}
+ ]},
+{id:'sec',n:11,title:'Security',sub:'OTP login, JWT, ownership, payments, webhooks',o3:{},
+ actors:[
+  ['box','app',{k:'phone',t:"Priya's phone",s:'stores tokens'}],['box','waf',{k:'firewall',t:'Edge firewall',s:'WAF + CDN'}],
+  ['box','auth',{k:'lock',t:'Auth service',s:'OTP → JWT',cls:'acc'}],['box','sms',{k:'ext',t:'SMS provider',s:'sends OTP',cls:'ext',w:160}],
+  ['box','gw',{k:'gateway',t:'API gateway',s:'verifies JWT'}],['box','order',{k:'app',t:'Order service',s:'checks ownership'}],
+  ['box','rzp',{k:'ext',t:'Razorpay checkout',s:'card / UPI',cls:'ext'}],['box','pay',{k:'app',t:'Payment service',s:'verifies signature'}],
+  ['crowd','bad',{cnt:'Attack traffic'}],['pill','msg',{t:'',cls:'acc'}],
+  SUM('Security in six lines',["1. Authentication proves who you are; authorization decides what you may do.","2. Short-lived JWTs verified at the gateway; refresh tokens to renew them.","3. Check ownership on every resource (stops IDOR); use random IDs.","4. Never store card data: let the payment provider tokenize it.","5. Verify webhook signatures; keep secrets in a vault, not in code.","6. TLS everywhere, a WAF at the edge, parameterized queries against injection."],"Interview line: “OTP → short-lived JWT checked at the gateway; ownership check on every order.”")],
+ scenes:[
+  {tag:'start',title:'Log in with a one-time code',cap:"Priya enters her phone number. The request passes the edge firewall to the auth service, which sends a 6-digit code by SMS. Attempts are limited to 3 per 10 minutes so codes can't be guessed.",set:{app:[130,280,1,1],waf:[330,280,1,1],auth:[560,180,1,1],sms:[790,180,1,1],msg:[330,140,1,1]},txt:{msg:'OTP sent to +91 98xxx xxx21'},seq:[['app','waf','a',0],['waf','auth','a',.8],['auth','sms','a',1.6]]},
+  {tag:'idea',title:'She gets a signed token',cap:"After the right code, the auth service gives her phone a JWT: a small signed token that says who she is and expires in 15 minutes, plus a longer-lived refresh token stored securely.",txt:{msg:'JWT · user_42 · customer · 15 min'},lcls:{msg:'ok'},seq:[['auth','waf','g',0],['waf','app','g',.8]]},
+  {tag:'fix',title:'Every request carries the token',cap:"Each API call includes the token. The gateway checks its signature with the auth service's public key, with no database lookup. A forged or expired token gets 401 Unauthorized.",set:{gw:[560,350,1,1],order:[790,350,1,1]},txt:{msg:'signature ✓ → user_42'},seq:[['app','waf','a',0],['waf','gw','a',.8],['gw','order','a',1.6]]},
+  {tag:'problem',title:"Problem: peeking at another order",cap:"Someone with a valid login changes the order number in the URL from 48213 to 48214. Their token is genuine, so checking the login alone would happily return a stranger's address.",txt:{msg:'GET /orders/48214 (not theirs)'},lcls:{msg:'bad'},seq:[['app','waf','b',0],['waf','gw','b',.8],['gw','order','b',1.6]]},
+  {tag:'fix',title:'Fix: check ownership every time',cap:"Authentication says who you are; authorization decides what you may see. The order service compares the order's owner with the user in the token and returns 403 Forbidden. Order IDs are random, too.",lab:{order:['Order service','403: not your order']},txt:{msg:'owner check → 403 Forbidden'},lcls:{msg:'ok'},seq:[['gw','order','a',0],['order','gw','b',.9]]},
+  {tag:'fix',title:'Card details never touch our servers',cap:"Payment happens inside Razorpay's checkout. Card numbers and UPI details go straight to them, and we only receive a payment ID. We never store card data, which keeps us out of the riskiest compliance scope.",set:{gw:[560,350,1,0],order:[790,350,1,0],rzp:[380,470,1,1],pay:[640,470,1,1]},lab:{order:['Order service','checks ownership']},txt:{msg:'card data goes only to Razorpay'},seq:[['app','rzp','a',0,1.2]]},
+  {tag:'fix',title:'Verify every webhook',cap:"Razorpay signs each webhook with a shared secret. The payment service recomputes the signature with the secret from its vault and rejects anything that doesn't match, so nobody can fake a “payment succeeded” message.",lab:{pay:['Payment service','signature ✓ → paid']},txt:{msg:'webhook signature (HMAC) ✓'},seq:[['rzp','pay','y',0,1]]},
+  {tag:'fix',title:'The edge firewall absorbs attacks',cap:"Bots try SQL injection strings and flood the login page. The web application firewall and CDN at the edge block known attack patterns and absorb floods before they ever reach our servers.",set:{rzp:[380,470,1,0],pay:[640,470,1,0],bad:[130,460,1,1]},txt:{msg:'WAF blocks floods and injections'},flows:[['bad','waf','b',110],['waf','bad','b',300],['app','waf','a',700]]},
+  {tag:'summary',title:'What to remember',cap:"Short-lived signed tokens prove who someone is, ownership checks decide what they can see, payment data stays with the payment provider, webhooks are verified, and the edge firewall stops attacks early.",set:{sum:[480,290,1,1]},dim:['sum']}
+ ]},
+{id:'obs',n:12,title:'Observability & deploys',sub:'Metrics, logs, traces, alerts, canary releases',o3:{},
+ actors:[
+  ['box','sA',{k:'app',t:'Order service',s:'emits telemetry'}],['box','sB',{k:'app',t:'Payment service',s:'emits telemetry'}],['box','sC',{k:'app',t:'Menu service',s:'emits telemetry'}],
+  ['box','col',{k:'worker',t:'Collector',s:'OpenTelemetry',cls:'acc'}],['box','store',{k:'db',label:'METRICS · LOGS · TRACES',t:'Telemetry stores',s:'Prometheus · Loki · Tempo',cls:'db',w:220}],
+  ['box','graf',{k:'monitor',t:'Dashboards',s:'orders/min by city',w:175}],['box','pd',{k:'phone',t:'On-call engineer',s:'PagerDuty',w:175}],
+  ['crowd','users',{cnt:'Customers'}],['box','argo',{k:'router',t:'Canary rollout',s:'Argo Rollouts',cls:'acc'}],
+  ['box','v41',{k:'server',t:'Order v41',s:'95% of users',meter:40}],['box','v42',{k:'server',t:'Order v42',s:'5% of users',meter:40}],['pill','msg',{t:'',cls:'acc'}],
+  SUM('Observability in six lines',["1. Metrics say something is wrong, traces say where, logs say exactly what.","2. Track the four golden signals plus business metrics (orders per minute).","3. Alert on SLOs and user-facing symptoms, not on every CPU spike.","4. Pass a trace ID through every service so logs and traces join up.","5. Release with canaries and feature flags; roll back automatically.","6. Tools: OpenTelemetry, Prometheus, Grafana, Loki, Tempo, Sentry, PagerDuty, Argo."],"Interview line: “OpenTelemetry everywhere, SLO-based alerts, canary deploys with auto-rollback.”")],
+ scenes:[
+  {tag:'start',title:"Every service reports what it's doing",cap:"Each service sends three kinds of telemetry: metrics (numbers over time), logs (what happened) and traces (one request's journey across services). OpenTelemetry collects all three in one standard way.",set:{sA:[140,190,1,1],sB:[260,340,1,1],sC:[140,470,1,1],col:[450,330,1,1]},flows:[['sA','col','a',500],['sB','col','a',500],['sC','col','a',500]]},
+  {tag:'idea',title:'Stored where it can be searched',cap:"Metrics go to Prometheus, logs to Loki or Elasticsearch, and traces to Tempo or Jaeger. Each store is built for its kind of data, so questions come back in seconds.",set:{store:[680,330,1,1]},flows:[['sA','col','a',500],['sB','col','a',500],['sC','col','a',500],['col','store','u',300]]},
+  {tag:'fix',title:'One screen for system health',cap:"Grafana shows the four golden signals for every service (latency, traffic, errors, saturation) next to the most important business number: orders per minute by city, compared with last Friday.",set:{graf:[860,180,1,1]},flows:[['col','store','u',400],['store','graf','g',400]]},
+  {tag:'problem',title:'Checkout errors rise: page on-call',cap:"At 8:20 pm checkout success drops below its 99.5% target. An alert based on that target pages the on-call engineer. Alerts fire on what users feel, not on every CPU spike, so people trust them.",set:{pd:[860,450,1,1],msg:[450,150,1,1]},txt:{msg:'checkout success 97% < 99.5%'},lcls:{msg:'bad'},shake:['pd'],seq:[['graf','pd','b',0],['graf','pd','b',.6]]},
+  {tag:'fix',title:'The trace shows exactly where',cap:"Every request carries a trace ID from the gateway onward. The engineer opens one slow checkout and sees it spent 4.1 seconds waiting on the payment service. The cause is found in minutes, not hours.",txt:{msg:'trace: 4.1 s waiting on payments'},lcls:{msg:'acc'},seq:[['sA','col','y',0],['sB','col','b',.4],['col','store','u',1],['store','graf','g',1.8]]},
+  {tag:'idea',title:'Ship new code to 5% first',cap:"Most outages come from deploys. So version 42 of the order service goes to only 5% of users, while 95% stay on version 41. The rollout tool compares their error rates live.",set:{sA:[140,190,1,0],sB:[260,340,1,0],sC:[140,470,1,0],col:[450,330,1,0],store:[680,330,1,0],graf:[860,180,1,0],pd:[860,450,1,0],users:[140,300,1,1],argo:[400,300,1,1],v41:[680,160,1,1],v42:[680,440,1,1],msg:[400,140,1,1]},txt:{msg:'new version → 5% of users'},lcls:{msg:'acc'},flows:[['users','argo','a',200],['argo',['v41','v41','v41','v41','v41','v41','v41','v41','v41','v42'],'a',150]]},
+  {tag:'problem',title:'Problem: the new version has a bug',cap:"Version 42 has a bug that breaks UPI payments for some users. Its error rate jumps to 4.2% while version 41 stays at 0.3%.",meter:{v42:95},lab:{v42:['Order v42','errors 4.2%']},shake:['v42'],txt:{msg:'v42 errors 4.2% vs v41 0.3%'},lcls:{msg:'bad'},flows:[['users','argo','a',200],['argo',['v41','v41','v41','v41','v42'],'a',150]]},
+  {tag:'fix',title:'Fix: automatic rollback',cap:"The rollout tool sees the difference and rolls version 42 back within 3 minutes, without waiting for a human. Only 5% of users saw the bug, briefly, and the trace points straight at the failing call.",cls:{v42:'dead'},lab:{v42:['Order v42','rolled back']},txt:{msg:'auto-rollback in 3 minutes'},lcls:{msg:'ok'},flows:[['users','argo','a',200],['argo','v41','a',150]]},
+  {tag:'summary',title:'What to remember',cap:"Collect metrics, logs and traces with one standard, alert on what users actually feel, follow trace IDs to the cause, and release new code to a small slice first with automatic rollback.",set:{sum:[480,290,1,1]},dim:['sum']}
+ ]}
+);
+{const ORD={scale:1,cache:4,db:5};EPS.forEach(e=>{if(!e.n)e.n=ORD[e.id];e.title=e.title||e.name.replace(/^Episode \d+ · /,'')});
+ EPS.sort((a,b)=>a.n-b.n);EPS.forEach(e=>{e.name=`Episode ${e.n} · ${e.title}`})}
+
+/* ================= ACTORS ================= */
+const stage=$('stage');
+function person(g,x,y){E('circle',{class:'person',cx:x,cy:y-9,r:7},g);E('path',{class:'person',d:`M${x-11},${y+12} Q${x-11},${y} ${x},${y} Q${x+11},${y} ${x+11},${y+12} Z`},g)}
+function kindOf(id,o){
+  if(o.k){const L={phone:'CLIENT',dns:'DNS',cdn:'CDN',gateway:'API GATEWAY',queue:'EVENT STREAM',ext:'EXTERNAL',storage:'OBJECT STORAGE',search:'SEARCH INDEX',monitor:'MONITORING',lock:'AUTH',flow:'WORKFLOW',worker:'WORKER',firewall:'FIREWALL',server:'SERVER',lb:'LOAD BALANCER',router:'ROUTER',app:'SERVICE',db:'DATABASE',cache:'CACHE'};return[o.k,o.label||L[o.k]||o.k.toUpperCase()]}
+  if(/^S\d/.test(id))return['server','SERVER'];if(id==='LB')return['lb','LOAD BALANCER'];if(id==='router')return['router','ROUTER'];
+  if(id==='redis')return['cache','KEY-VALUE STORE'];if(id==='cache')return['cache','CACHE'];if(id==='app')return['app','APP SERVICE'];
+  if(o.cls==='db')return['db',/^sh/.test(id)?'SHARD':/^r\d/.test(id)?'REPLICA':'DATABASE'];return['app','SERVICE']}
+function icon(g,k,x,y){const G=E('g',{class:'ico',transform:`translate(${x},${y})`},g);
+  if(k==='server'){[0,7,14].forEach((dy,i)=>{E('rect',{x:-8,y:-9+dy,width:16,height:5,rx:1.5},G);E('circle',{class:'led',cx:5,cy:-6.5+dy,r:1.2,style:`animation-delay:${i*.3}s`},G)})}
+  else if(k==='lb'){E('circle',{cx:-6,cy:0,r:2.6},G);['M-3,0 L7,-7','M-3,0 L7,0','M-3,0 L7,7'].forEach(d=>E('path',{d,class:'ln'},G));[-7,0,7].forEach(y=>E('circle',{cx:8,cy:y,r:1.8},G))}
+  else if(k==='cache'){E('path',{d:'M2,-9 L-6,1 L-0.5,1 L-2,9 L6,-2 L0.5,-2 Z'},G)}
+  else if(k==='db'){E('ellipse',{cx:0,cy:-6,rx:8,ry:3},G);E('path',{class:'ln',d:'M-8,-6 V6 A8,3 0 0 0 8,6 V-6 M-8,0 A8,3 0 0 0 8,0'},G)}
+  else if(k==='router'){['M-8,-6 H-2 L4,6 H8','M-8,6 H-2 L4,-6 H8'].forEach(d=>E('path',{d,class:'ln'},G))}
+  else if(k==='phone'){E('rect',{x:-5,y:-8,width:10,height:16,rx:2.2,class:'ln'},G);E('line',{x1:-2,y1:5,x2:2,y2:5,class:'ln'},G)}
+  else if(k==='dns'||k==='cdn'){E('circle',{cx:0,cy:0,r:7.5,class:'ln'},G);E('ellipse',{cx:0,cy:0,rx:3.2,ry:7.5,class:'ln'},G);E('line',{x1:-7.5,y1:0,x2:7.5,y2:0,class:'ln'},G);if(k==='cdn')E('circle',{cx:6,cy:-6,r:2.2},G)}
+  else if(k==='gateway'){E('path',{class:'ln',d:'M0,-8 L7,-5 V1 C7,5 3.5,7.2 0,8.5 C-3.5,7.2 -7,5 -7,1 V-5 Z'},G);E('path',{class:'ln',d:'M-3,0 L-0.5,2.5 L3.5,-2.5'},G)}
+  else if(k==='queue'){[-6,0,6].forEach((y,i)=>E('rect',{x:-8+i*2,y:y-2,width:14-i*2,height:4,rx:1.2},G))}
+  else if(k==='ext'){E('path',{class:'ln',d:'M-6,5 H5.5 A3.8,3.8 0 0 0 5,-2.5 A5,5 0 0 0 -4.5,-1.5 A3.3,3.3 0 0 0 -6,5 Z'},G)}
+  else if(k==='storage'){E('ellipse',{cx:0,cy:-5,rx:7,ry:2.6,class:'ln'},G);E('path',{class:'ln',d:'M-7,-5 L-5,7 H5 L7,-5'},G)}
+  else if(k==='search'){E('circle',{cx:-1.5,cy:-1.5,r:5,class:'ln'},G);E('line',{x1:2.3,y1:2.3,x2:7,y2:7,class:'ln'},G)}
+  else if(k==='monitor'){E('path',{class:'ln',d:'M-8,5 L-3.5,-1 L0.5,2.5 L7.5,-6'},G);E('line',{x1:-8,y1:8,x2:8,y2:8,class:'ln'},G)}
+  else if(k==='lock'){E('rect',{x:-6,y:-1,width:12,height:9,rx:2,class:'ln'},G);E('path',{class:'ln',d:'M-3.5,-1 V-4 A3.5,3.5 0 0 1 3.5,-4 V-1'},G)}
+  else if(k==='flow'){E('circle',{cx:-6,cy:-4,r:2.4},G);E('circle',{cx:6,cy:-4,r:2.4},G);E('circle',{cx:0,cy:6,r:2.4},G);E('path',{class:'ln',d:'M-3.6,-4 H3.6 M5,-1.8 L1.5,4 M-5,-1.8 L-1.5,4'},G)}
+  else if(k==='worker'){E('circle',{cx:0,cy:0,r:3.5,class:'ln'},G);[0,45,90,135].forEach(a=>E('line',{x1:0,y1:-8,x2:0,y2:-5.5,class:'ln',transform:`rotate(${a})`},G));[180,225,270,315].forEach(a=>E('line',{x1:0,y1:-8,x2:0,y2:-5.5,class:'ln',transform:`rotate(${a})`},G))}
+  else if(k==='firewall'){E('rect',{x:-8,y:-7,width:16,height:14,rx:1.5,class:'ln'},G);E('path',{class:'ln',d:'M-8,-2.3 H8 M-8,2.3 H8 M-2,-7 V-2.3 M3,-2.3 V2.3 M-3,2.3 V7'},G)}
+  else{E('rect',{x:-8,y:-7,width:16,height:14,rx:2.5,class:'ln'},G);E('line',{x1:-8,y1:-3,x2:8,y2:-3,class:'ln'},G);E('circle',{cx:-5,cy:-5,r:.9},G)}
+}
+function mk(type,id,o,layer){
+  const outer=E('g',{class:'actor',opacity:0},layer),inner=E('g',{class:'inner'},outer);const A={id,outer,inner,hw:60,hh:30,type,mv:0};
+  if(type==='box'){const w=o.w||190,h=o.meter!=null?112:92;A.hw=w/2;A.hh=h/2;const [k,label]=kindOf(id,o);A.kind=k;
+    const cyl=k==='db',off=cyl?7:0,top=-h/2;
+    E('rect',{class:'glow',x:-w/2-6,y:top-6,width:w+12,height:h+12,rx:18},inner);
+    if(cyl){E('path',{class:'ab '+(o.cls||''),d:`M${-w/2},${top+10} A${w/2},10 0 0 1 ${w/2},${top+10} V${h/2-10} A${w/2},10 0 0 1 ${-w/2},${h/2-10} Z`},inner);
+      E('path',{class:'cyl',d:`M${-w/2},${top+10} A${w/2},10 0 0 0 ${w/2},${top+10}`},inner)}
+    else E('rect',{class:'ab '+(o.cls||''),x:-w/2,y:top,width:w,height:h,rx:14},inner);
+    const hy=top+20+off;E('rect',{class:'icobg '+(o.cls||''),x:-w/2+10,y:hy-11,width:22,height:22,rx:6},inner);icon(inner,k,-w/2+21,hy);
+    E('text',{class:'ak',x:-w/2+40,y:hy+4},inner,label);
+    A.t=E('text',{class:'at','text-anchor':'middle',y:top+50+off},inner,o.t);A.s=E('text',{class:'as','text-anchor':'middle',y:top+68+off},inner,o.s);
+    if(o.meter!=null){const x0=-w/2+16,bw=w-74;A.bw=bw;E('rect',{class:'mbg',x:x0,y:h/2-24-(cyl?6:0),width:bw,height:8,rx:4},inner);
+      A.mf=E('rect',{class:'mfill l',x:x0,y:h/2-24-(cyl?6:0),width:0,height:8,rx:4},inner);A.mt=E('text',{class:'mt','text-anchor':'end',x:w/2-14,y:h/2-16.5-(cyl?6:0)},inner,'')}
+    const xx=E('g',{class:'xx'},inner);E('circle',{class:'xbg',cx:w/2-6,cy:top+6,r:15},xx);E('line',{x1:w/2-12,y1:top,x2:w/2,y2:top+12},xx);E('line',{x1:w/2,y1:top,x2:w/2-12,y2:top+12},xx);
+    const off2=E('g',{class:'offl'},inner);E('rect',{x:-36,y:top+h-2-12,width:72,height:20,rx:10},off2);E('text',{'text-anchor':'middle',y:top+h-2+2},off2,'OFFLINE')}
+  else if(type==='crowd'){A.hw=64;A.hh=64;E('circle',{class:'crowdbg',r:70,cy:2},inner);[-34,0,34].forEach(x=>[-36,-2].forEach((y,j)=>person(inner,x+(j?17:0)-8,y)));person(inner,-25,32);person(inner,9,32);
+    A.c=E('text',{class:'cnt','text-anchor':'middle',y:96},inner,o.cnt)}
+  else if(type==='pill'){outer.setAttribute('class','actor pl '+(o.cls||''));A.r=E('rect',{x:-50,y:-15,width:100,height:30,rx:15},inner);A.c=E('text',{'text-anchor':'middle',y:4.5},inner,'');setPill(A,o.t)}
+  else if(type==='ceil'){outer.setAttribute('class','actor ceil');A.hw=o.w/2;E('rect',{class:'cz',x:-o.w/2,y:-46,width:o.w,height:46},inner);E('line',{x1:-o.w/2,y1:0,x2:o.w/2,y2:0},inner);E('text',{'text-anchor':'middle',y:-12},inner,'▲ '+o.t+' ▲')}
+  else if(type==='q'){A.hw=30;A.hh=36;E('circle',{class:'qbg',r:40},inner);E('text',{class:'qm','text-anchor':'middle',y:24},inner,'?')}
+  else if(type==='card'){outer.setAttribute('class','actor card');A.hw=o.w/2;A.hh=o.h/2;const x0=-o.w/2+28,y0=-o.h/2;
+    E('rect',{class:'c',x:-o.w/2,y:-o.h/2,width:o.w,height:o.h,rx:18},inner);E('rect',{class:'cbar',x:-o.w/2,y:-o.h/2,width:o.w,height:5,rx:2.5},inner);
+    if(o.split)E('line',{class:'sep',x1:-o.w/2+o.split,y1:y0+66,x2:-o.w/2+o.split,y2:y0+250},inner);
+    o.lines.forEach(([c,t,y,x])=>E('text',{class:c,x:x!=null?-o.w/2+x+(x?6:28):x0,y:y0+y},inner,t))}
+  else if(type==='bars'){A.hw=150;A.hh=40;
+    E('text',{class:'as',x:-150,y:-14},inner,'hash % N: data moved when adding shard 4');E('rect',{class:'bar-bg',x:-150,y:-8,width:300,height:12,rx:6},inner);A.b1=E('rect',{class:'bar-b mfill',x:-150,y:-8,width:0,height:12,rx:6},inner);E('text',{class:'mt',x:156,y:2},inner,'75%');
+    E('text',{class:'as',x:-150,y:26},inner,'consistent hashing');E('rect',{class:'bar-bg',x:-150,y:32,width:300,height:12,rx:6},inner);A.b2=E('rect',{class:'bar-g mfill',x:-150,y:32,width:0,height:12,rx:6},inner);E('text',{class:'mt',x:156,y:42},inner,'25%')}
+  return A;
+}
+function setPill(A,t){A.c.textContent=t;const w=Math.max(60,t.length*7.6+30);A.r.setAttribute('x',-w/2);A.r.setAttribute('width',w);A.hw=w/2;A.hh=15}
+function setMeter(A,v,instant){if(!A.mf)return;A.mf.setAttribute('width',A.bw*v/100);A.mf.setAttribute('class','mfill '+(v<60?'l':v<85?'m':'h'));
+  A.outer.classList.toggle('hotload',v>=85);
+  const from=A.mv,st=performance.now();A.mv=v;if(instant||RM){A.mt.textContent=v+'%';return}
+  (function f(now){const t=Math.min(1,(now-st)/800);A.mt.textContent=Math.round(from+(v-from)*t)+'%';if(t<1)requestAnimationFrame(f)})(st)}
+
+
+/* ================= 3D (isometric) VIEW ================= */
+let MODE='3d';try{if(localStorage.getItem('sd-view')==='2d')MODE='2d'}catch(e){}
+const C30=.866;
+const ip=(u,v,z)=>[+((u-v)*C30).toFixed(2),+((u+v)*.5-(z||0)).toFixed(2)];
+function proj(x,y){return[480+(x-480)*.92,318+(y-290)*.9]}
+const pts=a=>a.map(p=>p.join(',')).join(' ');
+function cuboid(g,a,b,h,z0,extra){const t=z0+h;
+  const L=[ip(-a,b,t),ip(a,b,t),ip(a,b,z0),ip(-a,b,z0)],R=[ip(a,-b,t),ip(a,b,t),ip(a,b,z0),ip(a,-b,z0)],T=[ip(-a,-b,t),ip(a,-b,t),ip(a,b,t),ip(-a,b,t)];
+  E('polygon',{class:'f-l',points:pts(L)},g);E('polygon',{class:'f-r',points:pts(R)},g);E('polygon',{class:'f-t',points:pts(T)},g);if(extra)extra(t)}
+function onTop(g,z){return E('g',{transform:`matrix(${C30} .5 ${-C30} .5 0 ${-z})`},g)}
+function disk(g,R,th,cls){const rx=R*1.2247,ry=R*.7071;
+  E('path',{class:'d-s '+(cls||''),d:`M${-rx},0 A${rx},${ry} 0 0 0 ${rx},0 V${th} A${rx},${ry} 0 0 1 ${-rx},${th} Z`},g);
+  E('ellipse',{class:'d-t '+(cls||''),cx:0,cy:0,rx,ry},g);return[rx,ry]}
+function cyl(g,R,h,z0,bands){const rx=R*1.2247,ry=R*.7071,top=-(z0+h),bot=-z0;
+  E('path',{class:'c-s',d:`M${-rx},${top} V${bot} A${rx},${ry} 0 0 0 ${rx},${bot} V${top} Z`},g);
+  for(let i=1;i<bands;i++){const y=top+(bot-top)*i/bands;E('path',{class:'c-b',d:`M${-rx},${y} A${rx},${ry} 0 0 0 ${rx},${y}`},g)}
+  E('ellipse',{class:'c-t',cx:0,cy:top,rx,ry},g)}
+function isoPerson(g,x,y){E('ellipse',{class:'p-sh',cx:x,cy:y+1,rx:7,ry:3.5},g);E('path',{class:'p-b',d:`M${x-5.5},${y} V${y-11} A5.5,3 0 0 1 ${x+5.5},${y-11} V${y} A5.5,3 0 0 1 ${x-5.5},${y} Z`},g);E('circle',{class:'p-h',cx:x,cy:y-18,r:4.8},g)}
+function callout(g,A,H,o){const has=o.meter!=null,ph=has?54:40,w=150;A.H=H;
+  E('line',{class:'lead',x1:0,y1:-H-3,x2:0,y2:-H-14},g);E('circle',{class:'leaddot',cx:0,cy:-H-3,r:2.4},g);
+  const p=E('g',{class:'callout'},g);A.cop=p;p.style.transform=`translate(0px,${-H-14}px)`;const top=-ph;
+  E('rect',{class:'co',x:-w/2,y:top,width:w,height:ph,rx:9},p);
+  A.t=E('text',{class:'co-t','text-anchor':'middle',y:top+17},p,o.t);A.s=E('text',{class:'co-s','text-anchor':'middle',y:top+32},p,o.s);
+  if(has){A.bw=w-58;E('rect',{class:'mbg',x:-w/2+12,y:top+40,width:A.bw,height:6,rx:3},p);A.mf=E('rect',{class:'mfill l',x:-w/2+12,y:top+40,width:0,height:6,rx:3},p);A.mt=E('text',{class:'mt','text-anchor':'end',x:w/2-10,y:top+46.5},p,'')}
+  const xx=E('g',{class:'xx'},p);E('circle',{class:'xbg',cx:w/2-6,cy:top,r:12},xx);E('line',{x1:w/2-10.5,y1:top-4.5,x2:w/2-1.5,y2:top+4.5},xx);E('line',{x1:w/2-1.5,y1:top-4.5,x2:w/2-10.5,y2:top+4.5},xx)}
+function mk3(type,id,o,layer){
+  const outer=E('g',{class:'actor obj'},layer),inner=E('g',{class:'inner'},outer);outer.setAttribute('opacity',0);const A={id,outer,inner,type,mv:0,hw:50,hh:30};
+  E('ellipse',{class:'shadow',cx:10,cy:8,rx:70,ry:30},inner);
+  if(type==='crowd'){const [rx,ry]=disk(inner,48,7,'');A.rx=rx;A.ry=ry;
+    [[-22,-20],[2,-26],[24,-16],[-26,4],[0,0],[26,8],[-10,24],[14,26]].map(([u,v])=>ip(u,v,0)).sort((p,q)=>p[1]-q[1]).forEach(p=>isoPerson(inner,p[0],p[1]-2));
+    A.c=E('text',{class:'cnt3','text-anchor':'middle',y:ry+30},inner,o.cnt);return A}
+  const [k]=kindOf(id,o);A.kind=k;let H=40,R=40,cls='';
+  if(k==='server'){R=40;const [rx,ry]=disk(inner,R,7,'');A.rx=rx;A.ry=ry;
+    E('ellipse',{class:'glow3',cx:0,cy:0,rx:rx+8,ry:ry+5},inner);
+    for(let i=0;i<3;i++){const z=4+i*19;cuboid(inner,22,22,16,z,()=>{
+      E('polygon',{class:'slot',points:pts([ip(-17,22,z+5),ip(13,22,z+5),ip(13,22,z+11),ip(-17,22,z+11)])},inner);
+      const l=ip(22,14,z+8);E('circle',{class:'led3',cx:l[0],cy:l[1],r:1.9,style:`animation-delay:${i*.35}s`},inner);const l2=ip(22,6,z+8);E('circle',{class:'led3 b',cx:l2[0],cy:l2[1],r:1.9},inner)})}
+    H=4+3*19+6}
+  else if(k==='db'){R=40;const [rx,ry]=disk(inner,R,7,'db');A.rx=rx;A.ry=ry;E('ellipse',{class:'glow3',cx:0,cy:0,rx:rx+8,ry:ry+5},inner);outer.classList.add('dbk');cyl(inner,25,50,4,3);H=58}
+  else if(k==='cache'){R=40;const [rx,ry]=disk(inner,R,7,'acc');A.rx=rx;A.ry=ry;outer.classList.add('acck');
+    cuboid(inner,22,22,30,4,t=>{const tg=onTop(inner,t);E('path',{class:'ico3',d:'M3,-12 L-8,1 L-1,1 L-3,12 L8,-2 L1,-2 Z',transform:'rotate(45)'},tg)});H=40}
+  else if(k==='lb'||k==='router'){R=50;const [rx,ry]=disk(inner,R,8,'acc');A.rx=rx;A.ry=ry;outer.classList.add('acck');
+    cyl(inner,20,14,4,1);const tg=E('g',{transform:'translate(0,-18)'},inner);
+    if(k==='lb'){['M-12,0 L12,-8','M-12,0 L12,0','M-12,0 L12,8'].forEach(d=>E('path',{class:'ln3',d,transform:'scale(1,.58)'},tg));E('circle',{class:'ico3',cx:-12,cy:0,r:3.2},tg)}
+    else{['M-12,-4 H-4 L4,4 H12','M-12,4 H-4 L4,-4 H12'].forEach(d=>E('path',{class:'ln3',d,transform:'scale(1,.58)'},tg))}H=26}
+  else if(k==='queue'){R=46;const [rx,ry]=disk(inner,R,7,o.cls==='acc'?'acc':'okd');A.rx=rx;A.ry=ry;outer.classList.add(o.cls==='acc'?'acck':'okk');E('ellipse',{class:'glow3',cx:0,cy:0,rx:rx+8,ry:ry+5},inner);
+    cuboid(inner,36,14,26,4,t=>{for(let i=0;i<5;i++){const u=-30+i*13;E('polygon',{class:'slot msg',points:pts([ip(u,14,10),ip(u+9,14,10),ip(u+9,14,22),ip(u,14,22)])},inner)}});H=34}
+  else if(k==='phone'){R=34;const [rx,ry]=disk(inner,R,7,'');A.rx=rx;A.ry=ry;
+    cuboid(inner,6,15,44,4);E('polygon',{class:'screen3',points:pts([ip(-4,15,43),ip(4.5,15,43),ip(4.5,15,9),ip(-4,15,9)])},inner);H=50}
+  else if(['dns','cdn','gateway','storage','search','monitor','lock','flow','worker','firewall','ext'].includes(k)){R=40;const ex=k==='ext'||o.cls==='ext';
+    const [rx,ry]=disk(inner,R,7,ex?'ext':(o.cls==='acc'?'acc':(o.cls==='db'?'':'')));A.rx=rx;A.ry=ry;
+    if(ex)outer.classList.add('extk');else if(o.cls==='acc')outer.classList.add('acck');else if(o.cls==='db')outer.classList.add('dbb');
+    E('ellipse',{class:'glow3',cx:0,cy:0,rx:rx+8,ry:ry+5},inner);
+    cuboid(inner,22,22,30,4,t=>{const tg=onTop(inner,t);const ig=E('g',{transform:'rotate(45) scale(1.25)'},tg);icon(ig,k,0,0)});H=40}
+  else{R=40;const [rx,ry]=disk(inner,R,7,'');A.rx=rx;A.ry=ry;
+    cuboid(inner,28,12,40,4,t=>{for(let i=0;i<3;i++)E('polygon',{class:'slot',points:pts([ip(-22,12,t-9-i*9),ip(16,12,t-9-i*9),ip(16,12,t-13-i*9),ip(-22,12,t-13-i*9)])},inner)});H=48}
+  callout(inner,A,H,o);
+  const off=E('g',{class:'offl'},inner);E('rect',{x:-36,y:A.ry+12,width:72,height:20,rx:10},off);E('text',{'text-anchor':'middle',y:A.ry+26},off,'OFFLINE');
+  return A}
+function floor(){
+  const g=E('g',{class:'floor'},stage);E('rect',{class:'fl',x:0,y:0,width:960,height:540},g);
+  const O=[480,330],L=760,tr=p=>[p[0]+O[0],p[1]+O[1]];
+  for(let k=-L;k<=L;k+=40){const m=(k/40)%4===0?' m':'';let a=tr(ip(k,-L,0)),b=tr(ip(k,L,0));E('line',{class:'flg'+m,x1:a[0],y1:a[1],x2:b[0],y2:b[1]},g);a=tr(ip(-L,k,0));b=tr(ip(L,k,0));E('line',{class:'flg'+m,x1:a[0],y1:a[1],x2:b[0],y2:b[1]},g)}
+  for(let i=0;i<14;i++){const u=(((i*7919)%30)-15)*40,v=(((i*104729)%26)-13)*40;const c=[ip(u,v,0),ip(u+80,v,0),ip(u+80,v+40,0),ip(u,v+40,0)].map(tr);E('polygon',{class:'tile',points:pts(c)},g)}
+}
+
+/* ================= PLAYER ================= */
+let ep=null,A={},cur=0,playing=false,speed=1,voice=false,gen=0,startT=0,dur=0,raf=0,timers=[],applied={},userPaused=false,seen=false,elapsed=0;
+const fx=()=>stage.querySelector('g.fx'),wires=()=>stage.querySelector('g.wires');
+
+function load(i,keepPlay){
+  ep=EPS[i];A={};applied={};stop();stage.innerHTML='';
+  const defs=E('defs',{},stage);const rg=E('radialGradient',{id:'vig',cx:'50%',cy:'45%',r:'75%'},defs);E('stop',{offset:'60%','stop-color':'var(--stage)','stop-opacity':0},rg);E('stop',{offset:'100%','stop-color':'var(--vig)','stop-opacity':1},rg);
+  const pat=E('pattern',{id:'dots',width:24,height:24,patternUnits:'userSpaceOnUse'},defs);E('circle',{cx:12,cy:12,r:1.1,class:'dotg'},pat);
+  E('rect',{x:0,y:0,width:960,height:540,fill:'var(--stage)'},stage);if(MODE==='3d'){floor();E('rect',{x:0,y:0,width:960,height:540,fill:'url(#vig)'},stage)}else{E('rect',{x:0,y:0,width:960,height:540,fill:'url(#dots)'},stage);E('rect',{x:0,y:0,width:960,height:540,fill:'url(#vig)'},stage)}stage.classList.toggle('iso',MODE==='3d');
+  A._bar=E('rect',{class:'tagbar',x:0,y:0,width:960,height:4},stage);
+  E('g',{class:'wires'},stage);
+  const layer=E('g',{class:'actors'},stage);A._layer=layer;ep.actors.forEach(([t,id,o])=>{o=o||{};A[id]=(MODE==='3d'&&(t==='box'||t==='crowd'))?mk3(t,id,o,layer):mk(t,id,o,layer);A[id].o0=o});
+  E('g',{class:'fx'},stage);
+  const ov=E('g',{class:'ovg'},stage);const tg=E('g',{class:'ovtag ov'},ov);A._tagR=E('rect',{x:28,y:24,width:100,height:28,rx:7},tg);A._tagT=E('text',{x:41,y:43},tg,'');A._tag=tg;A._ov=ov;
+  A._title=E('text',{class:'ovt',x:28,y:86},ov,'');A._num=E('text',{class:'ovn',x:932,y:43,'text-anchor':'end'},stage,'');
+  document.querySelectorAll('#tabs button').forEach((b,j)=>{b.classList.toggle('on',j===i);b.setAttribute('aria-selected',j===i)});
+  buildTimeline();
+  const tr=$('tr');tr.innerHTML='';
+  ep.scenes.forEach((s,k)=>{const li=document.createElement('li');li.tabIndex=0;li.innerHTML=`<span class="n">${String(k+1).padStart(2,'0')}</span><span class="tg ${s.tag}">${TAGS[s.tag]}</span><span class="tx"><b></b><span></span></span>`;
+    li.querySelector('b').textContent=s.title;li.querySelector('.tx span').textContent=s.cap;li.onclick=()=>go(k);li.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go(k)}};tr.appendChild(li)});
+  cur=0;show(0,true);if(keepPlay)play();
+}
+const sceneDur=s=>Math.max(6500,s.cap.length*62);
+const total=()=>ep.scenes.reduce((a,s)=>a+sceneDur(s),0);
+const before=k=>ep.scenes.slice(0,k).reduce((a,s)=>a+sceneDur(s),0);
+function buildTimeline(){
+  const tl=$('tl');tl.innerHTML='<div class="track"><div class="fill"></div><div class="knob"></div></div><div class="marks"></div>';
+  const T=total(),track=tl.querySelector('.track'),marks=tl.querySelector('.marks');
+  ep.scenes.forEach((s,k)=>{const l=before(k)/T*100,w=sceneDur(s)/T*100;
+    if(k>0){const t=document.createElement('span');t.className='tick';t.style.left=l+'%';track.appendChild(t)}
+    const b=document.createElement('button');b.type='button';b.className='hit';b.style.left=l+'%';b.style.width=w+'%';b.title=`${k+1}. ${s.title}`;b.setAttribute('aria-label',`Scene ${k+1}: ${s.title}`);b.onclick=()=>go(k);track.appendChild(b);
+    const m=document.createElement('button');m.type='button';m.className='mark '+s.tag;m.style.left=l+'%';m.style.width=w+'%';m.tabIndex=-1;m.innerHTML=`<i></i><span>${k+1}</span>`;m.title=`${k+1}. ${TAGS[s.tag]}: ${s.title}`;m.onclick=()=>go(k);marks.appendChild(m)});
+}
+function drawProgress(){const T=total(),p=(before(cur)+Math.min(elapsed,sceneDur(ep.scenes[cur])))/T*100;const tl=$('tl');
+  tl.querySelector('.fill').style.width=p+'%';tl.querySelector('.knob').style.left=p+'%';
+  [...tl.querySelectorAll('.mark')].forEach((m,j)=>{m.classList.toggle('on',j===cur);m.classList.toggle('done',j<cur)})}
+
+function stateAt(k){
+  const st={};Object.keys(A).filter(x=>x[0]!=='_').forEach(id=>{const o=A[id].o0;st[id]={x:480,y:270,s:1,o:0,cls:'',lab:null,txt:o.t||o.cnt||'',meter:o.meter,lcls:o.cls||''}});
+  for(let j=0;j<=k;j++){const s=ep.scenes[j];
+    for(const id in (s.set||{})){const v=s.set[id];Object.assign(st[id],{x:v[0],y:v[1],s:v[2]!=null?v[2]:1,o:v[3]!=null?v[3]:1})}
+    if(MODE==='3d')for(const id in (s.set3||{})){const v=s.set3[id];Object.assign(st[id],{x:v[0],y:v[1],s:v[2]!=null?v[2]:st[id].s})}
+    for(const id in (s.cls||{}))st[id].cls=s.cls[id];for(const id in (s.lab||{}))st[id].lab=s.lab[id];
+    for(const id in (s.txt||{}))st[id].txt=s.txt[id];for(const id in (s.meter||{}))st[id].meter=s.meter[id];for(const id in (s.lcls||{}))st[id].lcls=s.lcls[id]}
+  return st;
+}
+function ends(a,b,pa,pb){const S=applied[a],T=applied[b],A1=A[a],B1=A[b];if(!S||!T)return null;
+  if(MODE==='3d'){const dx=T.x-S.x,dy=T.y-S.y,L=Math.hypot(dx,dy)||1,ux=dx/L,uy=dy/L;
+    const rad=(Z,v)=>Z.rx?1/Math.sqrt((ux/(Z.rx*v.s+6))**2+(uy/(Z.ry*v.s+5))**2):Math.min(Z.hw/Math.abs(ux||1e-9),Z.hh/Math.abs(uy||1e-9))+4;
+    const r1=rad(A1,S),r2=rad(B1,T);return[[S.x+ux*r1,S.y+uy*r1],[T.x-ux*r2,T.y-uy*r2]]}
+  const clip=(v,hw,hh,dx,dy)=>{const k=Math.min(dx?hw/Math.abs(dx):1e9,dy?hh/Math.abs(dy):1e9);return[v.x+dx*k,v.y+dy*k]};
+  const dx=T.x-S.x,dy=T.y-S.y;return[clip(S,A1.hw*S.s+(pa||5),A1.hh*S.s+(pa||5),dx,dy),clip(T,B1.hw*T.s+(pb||8),B1.hh*T.s+(pb||8),-dx,-dy)]}
+function show(k,instant){
+  gen++;const g=gen;timers.forEach(clearTimeout);timers=[];cur=k;elapsed=0;const s=ep.scenes[k],st=stateAt(k);
+  fx().innerHTML='';const W=wires();W.innerHTML='';
+  for(const id in st){const a=A[id],v=st[id],prev=applied[id];
+    const O3=MODE==='3d'&&ep.o3&&ep.o3[id];const P=O3?O3:(MODE==='3d'&&a.type!=='card'&&a.type!=='bars'&&a.type!=='ceil')?proj(v.x,v.y):[v.x,v.y];
+    const tf=`translate(${P[0]}px,${P[1]}px) scale(${v.s})`;
+    if(instant||!prev||prev.o===0){a.outer.style.transition='none';a.outer.style.transform=`translate(${P[0]}px,${P[1]}px) scale(${v.s*(v.o&&!instant?0.82:1)})`;a.outer.getBoundingClientRect();a.outer.style.transition=''}
+    a.outer.style.transform=tf;
+    const dimmed=s.dim&&!s.dim.includes(id)&&v.o>0;a.outer.setAttribute('opacity',dimmed?0.07:v.o);
+    a.outer.classList.toggle('dead',v.cls==='dead');
+    if(a.cop)a.cop.style.transform=`translate(0px,${-a.H-14}px) scale(${v.s>1?1/v.s:1})`;
+    if(a.type==='box'){if(v.lab){a.t.textContent=v.lab[0];a.s.textContent=v.lab[1]}else{a.t.textContent=a.o0.t;a.s.textContent=a.o0.s}if(v.meter!=null)setMeter(a,v.meter,instant||!prev)}
+    if(a.type==='crowd')a.c.textContent=v.txt;
+    if(a.type==='pill'){setPill(a,v.txt);a.outer.setAttribute('class','actor pl '+(v.lcls||''))}
+    if(a.type==='bars'){a.b1.setAttribute('width',v.o?225:0);a.b2.setAttribute('width',v.o?75:0)}
+    applied[id]={...v,x:P[0],y:P[1]}}
+  if(MODE==='3d'){const order=()=>{const L=A._layer;const kids=[...L.children];const sorted=kids.slice().sort((p,q)=>{const ip_=Object.values(A).find(z=>z&&z.outer===p),iq=Object.values(A).find(z=>z&&z.outer===q);const y=z=>z&&applied[z.id]?(z.type==='card'?1e4:applied[z.id].y):0;return y(ip_)-y(iq)});if(sorted.some((n,i)=>n!==kids[i]))sorted.forEach(n=>L.appendChild(n))};if(instant)order();else timers.push(setTimeout(()=>{if(g===gen)order()},1000))}
+  // wires for every connection used in this scene
+  const pairs=new Map();(s.flows||[]).forEach(f=>(Array.isArray(f[1])?f[1]:[f[1]]).forEach(b=>{const key=[f[0],b].sort().join('|');if(!pairs.has(key))pairs.set(key,[f[0],b,f[2]])}));
+  (s.seq||[]).forEach(q=>{const key=[q[0],q[1]].sort().join('|');if(!pairs.has(key))pairs.set(key,[q[0],q[1],q[2]])});
+  pairs.forEach(([a,b,c])=>{if(!applied[a]||!applied[b]||!applied[a].o||!applied[b].o)return;const e=ends(a,b,2,4);if(!e)return;const d=`M${e[0][0]},${e[0][1]} L${e[1][0]},${e[1][1]}`;
+    const gW=E('g',{class:'wire'+(MODE==='3d'?' cable':'')},W);E('path',{class:'wb',d},gW);E('path',{class:'wf wf-'+c,d},gW);
+    timers.push(setTimeout(()=>gW.classList.add('in'),instant?0:650))});
+  (s.shake||[]).forEach(id=>{const n=A[id].inner;n.classList.remove('shake');void n.getBoundingClientRect();if(!RM)n.classList.add('shake')});
+  A._tag.setAttribute('class','ovtag ov '+s.tag);A._tagT.textContent=TAGS[s.tag];A._tagR.setAttribute('width',TAGS[s.tag].length*8.4+28);A._bar.setAttribute('class','tagbar '+s.tag);
+  A._title.textContent=s.title;A._num.textContent=`SCENE ${k+1} / ${ep.scenes.length}`;
+  A._ov.classList.remove('rise');void A._ov.getBoundingClientRect();if(!RM&&!instant)A._ov.classList.add('rise');
+  $('capk').innerHTML='';const ct=document.createElement('span');ct.className='tg '+s.tag;ct.textContent=TAGS[s.tag];$('capk').append(ct,` ${ep.name} · scene ${k+1} of ${ep.scenes.length}`);
+  $('capt').textContent=s.cap;$('capt').classList.remove('rise');void $('capt').offsetWidth;if(!RM&&!instant)$('capt').classList.add('rise');
+  [...$('tr').children].forEach((li,j)=>{li.classList.toggle('on',j===k);li.classList.toggle('done',j<k)});
+  {const tr=$('tr'),li=tr.children[k];if(li){const t=li.offsetTop-tr.clientHeight/2+li.offsetHeight/2;tr.scrollTo({top:Math.max(0,t),behavior:(RM||instant)?'auto':'smooth'})}$('trc').textContent=`${k+1} / ${ep.scenes.length}`}
+  dur=sceneDur(s);startT=performance.now();drawProgress();updTime();
+  if(!RM){const dl=instant?200:950;
+    (s.flows||[]).forEach(f=>{const [a,b,c,iv]=f;let rr=0;const tick=()=>{if(g!==gen)return;const to=Array.isArray(b)?b[rr++%b.length]:b;packet(a,to,c,.9,g);timers.push(setTimeout(tick,iv/speed))};timers.push(setTimeout(tick,dl))});
+    if(s.seq){const tot=Math.max(...s.seq.map(q=>q[3]+(q[4]||.8)))+1.4;
+      const run=()=>{if(g!==gen)return;s.seq.forEach(q=>timers.push(setTimeout(()=>packet(q[0],q[1],q[2],q[4]||.8,g),q[3]*1000/speed)));timers.push(setTimeout(run,tot*1000/speed))};timers.push(setTimeout(run,dl))}}
+  if(playing){if(voice)speak(s.cap,g);cancelAnimationFrame(raf);raf=requestAnimationFrame(tickBar)}
+}
+function packet(a,b,c,du,g){
+  const e=ends(a,b);if(!e)return;const [p,q]=e,L=fx();
+  const trail=[0,1,2,3].map(i=>E('circle',{r:5.5-i*1.1,class:'pk-'+c,opacity:0},L));const halo=E('circle',{r:12,class:'pk-'+c,opacity:0},L);
+  const st=performance.now(),D=du*1000/speed;
+  const pos=t=>{t=Math.max(0,Math.min(1,t));const e2=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;return[p[0]+(q[0]-p[0])*e2,p[1]+(q[1]-p[1])*e2]};
+  (function f(now){if(g!==gen){trail.forEach(x=>x.remove());halo.remove();return}const t=Math.min(1,(now-st)/D);const op=t>.9?(1-t)/.1:Math.min(1,t*8);
+    trail.forEach((el,i)=>{const P=pos(t-i*.045);el.setAttribute('cx',P[0]);el.setAttribute('cy',P[1]);el.setAttribute('opacity',op*(i?.5-i*.12:1))});
+    const P=pos(t);halo.setAttribute('cx',P[0]);halo.setAttribute('cy',P[1]);halo.setAttribute('opacity',op*.22);
+    if(t<1)requestAnimationFrame(f);else{trail.forEach(x=>x.remove());halo.remove();ripple(q,c,g);A[b].outer.classList.remove('ping');void A[b].outer.getBoundingClientRect();A[b].outer.classList.add('ping')}})(st);
+}
+function ripple(P,c,g){const r=E('circle',{class:'rip rs-'+c,cx:P[0],cy:P[1],r:6},fx());setTimeout(()=>r.remove(),650)}
+let spoken=false;
+function tickBar(now){if(!playing)return;elapsed=(now-startT)*speed;drawProgress();updTime();
+  if(elapsed>=dur&&(!voice||spoken)){next(true);return}raf=requestAnimationFrame(tickBar)}
+function updTime(){const f=t=>{t=Math.round(t/1000);return Math.floor(t/60)+':'+String(t%60).padStart(2,'0')};$('time').textContent=f((before(cur)+Math.min(elapsed,dur))/speed)+' / '+f(total()/speed)}
+function speak(t,g){spoken=false;try{const ss=window.speechSynthesis;if(!ss){spoken=true;return}ss.cancel();const u=new SpeechSynthesisUtterance(t);u.rate=speed;
+  const vs=ss.getVoices();const v=vs.find(v=>/en-IN/i.test(v.lang))||vs.find(v=>/^en/i.test(v.lang));if(v)u.voice=v;u.onend=()=>{if(g===gen)spoken=true};u.onerror=()=>{spoken=true};ss.speak(u);
+  setTimeout(()=>{if(g===gen)spoken=true},t.length*110+4000)}catch(e){spoken=true}}
+function play(){playing=true;$('bplay').textContent='❚❚ Pause';$('player').classList.add('playing');const keep=elapsed;show(cur);if(keep&&keep<dur){elapsed=keep;startT=performance.now()-keep/speed}}
+function pause(){const keep=elapsed;stop();elapsed=keep;drawProgress();updTime()}
+function stop(){playing=false;cancelAnimationFrame(raf);try{window.speechSynthesis&&speechSynthesis.cancel()}catch(e){}if($('bplay'))$('bplay').textContent='▶ Play';if($('player'))$('player').classList.remove('playing')}
+function next(auto){if(cur<ep.scenes.length-1)show(cur+1);else if(auto){stop();elapsed=dur;drawProgress();updTime()}}
+function go(k){show(k)}
+$('bplay').onclick=()=>{if(playing){pause();userPaused=true}else{userPaused=false;if(cur===ep.scenes.length-1&&elapsed>=dur){cur=0;elapsed=0}play()}};
+$('bprev').onclick=()=>show(Math.max(0,cur-1));$('bnext').onclick=()=>show(Math.min(ep.scenes.length-1,cur+1));
+$('brestart').onclick=()=>{cur=0;elapsed=0;userPaused=false;if(playing)show(0);else play()};
+$('bspeed').onclick=()=>{speed=speed===1?1.5:speed===1.5?.75:1;$('bspeed').textContent='Speed '+speed+'×';show(cur)};
+const vb=$('bvoice');if(!('speechSynthesis' in window))vb.hidden=true;
+vb.onclick=()=>{voice=!voice;vb.classList.toggle('on',voice);vb.setAttribute('aria-pressed',voice);vb.textContent=voice?'🔊 Voice on':'🔈 Voice off';if(!voice){try{speechSynthesis.cancel()}catch(e){}spoken=true}show(cur)};
+document.querySelector('.screen').addEventListener('keydown',e=>{if(e.key==='ArrowRight'){e.preventDefault();$('bnext').click()}else if(e.key==='ArrowLeft'){e.preventDefault();$('bprev').click()}else if(e.key===' '){e.preventDefault();$('bplay').click()}});
+const tabs=$('tabs');EPS.forEach((e,i)=>{const b=document.createElement('button');b.type='button';b.setAttribute('role','tab');b.innerHTML=`<i>${String(i+1).padStart(2,'0')}</i><b></b><span></span>`;b.querySelector('b').textContent=e.name.replace(/^Episode \d+ · /,'');b.querySelector('span').textContent=e.sub+' · '+e.scenes.length+' scenes';b.onclick=()=>{EPI=i;load(i,playing)};tabs.appendChild(b)});
+let EPI=0;
+function setView(m){if(m===MODE)return;MODE=m;try{localStorage.setItem('sd-view',m)}catch(e){}const k=cur,wp=playing;load(EPI,false);show(k,true);if(wp)play();syncView()}
+function syncView(){document.querySelectorAll('#view button').forEach(b=>{const on=b.dataset.v===MODE;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)})}
+document.querySelectorAll('#view button').forEach(b=>b.onclick=()=>setView(b.dataset.v));syncView();
+{const m=/^#ep(\d+)$/.exec(location.hash||'');const ix=m?EPS.findIndex(e=>e.n===+m[1]):-1;EPI=ix>=0?ix:0;}
+load(EPI,false);
+if(!RM&&'IntersectionObserver' in window)new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting&&!seen&&!userPaused){seen=true;play()}else if(!en.isIntersecting&&playing)pause()}),{threshold:.5}).observe($('player'));
+})();
+</script>
+
+</body>
+</html>

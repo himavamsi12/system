@@ -1,0 +1,17 @@
+/* Shared chrome: nav + base. Page tokens live in each page.css (same neutral values). */
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);-webkit-font-smoothing:antialiased}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+::selection{background:var(--ink,#0f1115);color:var(--bg,#fafafa)}
+
+.sitenav{position:sticky;top:0;z-index:30;background:var(--bg,#fafafa)}
+.sitenav .in{max-width:1180px;margin:0 auto;padding:18px max(20px,env(safe-area-inset-left,0px));display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.sitenav .brand{display:flex;align-items:center;text-decoration:none;color:var(--ink,#0f1115);font-family:"Geist",system-ui,sans-serif;font-weight:600;font-size:15px;letter-spacing:-.01em}
+.sitenav .brand picture{display:block}
+.sitenav .brand img{display:block;height:32px;width:auto}
+.sitenav nav{display:flex;gap:22px;flex-wrap:wrap;margin-left:auto}
+.sitenav nav a{font-family:"Geist",system-ui,sans-serif;text-decoration:none;color:var(--muted,#5a6070);font-size:14px;font-weight:500;padding:4px 0;transition:color .15s}
+.sitenav nav a:hover,.sitenav nav a[aria-current="page"]{color:var(--ink,#0f1115)}
+.sitenav nav a[aria-current="page"]{font-weight:600}
+.sitenav a:focus-visible{outline:2px solid var(--accent,#d9531e);outline-offset:3px;border-radius:2px}
