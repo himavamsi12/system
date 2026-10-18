@@ -5,15 +5,16 @@ import './page.css';
 
 export const metadata: Metadata = {
   title: "Concept Lab",
-  description: "19 animated 3D explainers, one for every core system design topic, scene by scene.",
+  description: "25 animated 3D explainers, one for every core system design topic, scene by scene.",
   
-  openGraph: { title: "Concept Lab", description: "19 animated 3D explainers, one for every core system design topic, scene by scene.", type: 'website' },
+  openGraph: { title: "Concept Lab", description: "25 animated 3D explainers, one for every core system design topic, scene by scene.", type: 'website' },
 };
 
 const Page = () => (
   <>
     <div dangerouslySetInnerHTML={{ __html: html }} />
     <Script src="/legacy/notes.js" strategy="afterInteractive" />
+    <Script src="/legacy/logos.js" strategy="afterInteractive" />
     <Script src="/legacy/videos.js" strategy="afterInteractive" />
   </>
 );

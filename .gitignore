@@ -2,3 +2,7 @@ node_modules
 .next
 next-env.d.ts
 tsconfig.tsbuildinfo
+
+# local secrets (ElevenLabs key etc.)
+.env*.local
+.env

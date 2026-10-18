@@ -637,6 +637,175 @@ txn: {
     ["What is write skew and how do you prevent it?", "Two transactions read the same condition (for example, at least one doctor on call), then each updates a different row, and together they break the rule. Snapshot isolation allows it. Prevent it with serializable isolation, locking the rows that formed the decision, or a constraint."],
     ["How do you handle transactions across microservices?", "You cannot rely on one ACID transaction. Use sagas with compensating actions, the outbox pattern for reliable events, idempotent consumers, and design each step to be retried safely."]
   ]
+},
+disc: {
+  def: "In a microservice system, programs call each other over the network, but their addresses keep changing as servers restart and scale. Service discovery (a registry with heartbeats) tells callers where live instances are. An API gateway is the single front door for outside clients, and a service mesh puts a sidecar proxy beside every service to handle retries, encryption and tracing for calls between services.",
+  terms: [
+    ["Service registry", "A live list of service names and the addresses of their healthy instances"],
+    ["Heartbeat", "A tiny periodic “still alive” message; silence means the instance is removed"],
+    ["Client-side discovery", "The caller asks the registry and chooses an instance itself"],
+    ["Server-side discovery", "The caller uses one fixed address; a load balancer does the lookup"],
+    ["API gateway", "One entry point for clients: auth, rate limits, routing and aggregation"],
+    ["Sidecar proxy", "A helper process beside each service that handles its network traffic"],
+    ["mTLS", "Mutual TLS: both sides prove who they are and encrypt the connection"],
+    ["Control plane", "The part of a mesh that configures all the sidecar proxies"]
+  ],
+  notes: [
+    "Never hard-code addresses of services that scale or restart.",
+    "A gateway handles traffic from outside (north-south); a mesh handles traffic between services (east-west).",
+    "Clients should cache the last known list so a registry outage does not stop calls.",
+    "A mesh adds extra hops, CPU and memory per pod, and operational complexity.",
+    "On Kubernetes, built-in Services and DNS cover discovery for most systems."
+  ],
+  qs: [
+    ["What is service discovery and why do you need it?", "Instances start, stop and move, so their addresses change. A registry keeps a live list by name, and heartbeats remove dead instances. Callers look up the name instead of using a fixed address."],
+    ["Client-side vs server-side discovery?", "Client-side: the caller queries the registry and picks an instance (Eureka, Consul). Server-side: the caller hits a stable address and a load balancer or Kubernetes Service picks. Server-side keeps clients simple; client-side avoids an extra hop."],
+    ["What does an API gateway do?", "It is the single entry point: authentication, rate limiting, routing, request aggregation and sometimes caching. Keep business logic out of it."],
+    ["API gateway vs service mesh?", "A gateway guards traffic coming from outside the system. A mesh manages service-to-service calls inside it with sidecars: mTLS, retries, traffic splitting and tracing."],
+    ["What are the downsides of a service mesh?", "Extra latency from two proxy hops, extra resource use on every pod, and one more complex system to upgrade and debug. It is overkill for a few services."],
+    ["What if the registry goes down?", "Run it as a cluster (3 to 5 nodes) and let clients cache the last known list. A slightly stale list plus retries is better than no list."]
+  ]
+},
+lock: {
+  def: "A distributed lock lets only one of several machines do a job at a time, using a shared store such as Redis, etcd or ZooKeeper. Locks expire so a crashed owner does not block everyone, but pauses can make two owners act at once, so fencing tokens are added. Leader election picks one boss node, and a quorum (majority) rule prevents two leaders.",
+  terms: [
+    ["Mutex / lock", "Makes sure only one party runs a critical section at a time"],
+    ["Lease / expiry", "A lock that frees itself after a time limit"],
+    ["Fencing token", "An increasing number issued with each lock; storage rejects older ones"],
+    ["Consensus", "A group of nodes agreeing on one value by majority vote (Raft, ZAB)"],
+    ["Leader election", "Choosing one node to do special work while others stand by"],
+    ["Heartbeat", "A periodic “I am alive” message"],
+    ["Quorum", "A majority of nodes, such as 2 of 3 or 3 of 5"],
+    ["Split brain", "Two parts of a cluster both believing they are the leader"]
+  ],
+  notes: [
+    "An in-process lock does not work across machines.",
+    "A lock with an expiry can be lost while its owner is paused.",
+    "Fencing tokens must be checked by the storage that is finally written.",
+    "Use odd cluster sizes (3 or 5) so a majority always exists.",
+    "Make work idempotent; treat locks as an optimization when you can."
+  ],
+  qs: [
+    ["How do you implement a distributed lock?", "Use a shared store: SET key value NX with an expiry. Release only if the value matches your token. Add a fencing token for safety, and consider etcd or ZooKeeper if correctness is critical."],
+    ["Why can a Redis lock fail?", "A pause or slow network can outlast the expiry, so two owners act at once, and an asynchronous failover can lose the lock. Fencing tokens and idempotent work limit the damage."],
+    ["What is a fencing token?", "A monotonically increasing number handed out with each lock grant. The resource rejects any request carrying a lower token than one it has already seen."],
+    ["How does leader election work?", "Nodes vote; a candidate that gets a majority becomes leader and sends heartbeats. If heartbeats stop, followers start a new election after a random delay."],
+    ["What is split brain and how do you prevent it?", "Two nodes both act as leader after a network partition. Requiring a majority (quorum) means only one side can elect a leader."],
+    ["What is the Redlock debate?", "Redlock uses several independent Redis nodes for a lock. Critics argue timing assumptions make it unsafe without fencing tokens; supporters accept it for efficiency locks."]
+  ]
+},
+stream: {
+  def: "Batch processing collects a large amount of data and processes it on a schedule, for example a nightly report. Stream processing handles each event as it arrives, so results are seconds old. MapReduce splits work into map, shuffle and reduce steps. Streaming adds windows, event time and watermarks to deal with endless, late and out-of-order data.",
+  terms: [
+    ["Batch", "Process a bounded pile of data at once, on a schedule"],
+    ["Stream", "Process an unbounded flow of events continuously"],
+    ["MapReduce", "Split data, map (count locally), shuffle (group by key), reduce (combine)"],
+    ["Window", "A slice of time used to group events: tumbling, sliding or session"],
+    ["Event time", "When the event actually happened"],
+    ["Watermark", "The system’s estimate that all events up to a time have arrived"],
+    ["Checkpoint", "Saved progress so a job can restart without losing or repeating work"],
+    ["Lambda / Kappa", "Two code paths (batch + stream) vs a single replayable stream path"]
+  ],
+  notes: [
+    "Batch is simpler, cheaper and very accurate; streaming is fresh but harder.",
+    "Use event time, not processing time, for correct windows.",
+    "Exactly-once is achieved with checkpoints plus idempotent or transactional writes.",
+    "Kappa replays the log to recompute results with new logic.",
+    "Many systems use both: stream for live views, batch for heavy history jobs."
+  ],
+  qs: [
+    ["Batch vs stream: how do you choose?", "By required freshness. Minutes or less points to streaming; daily reports or heavy history jobs point to batch. Streaming costs more to build and operate."],
+    ["Explain MapReduce.", "Split the input, mappers process parts in parallel, a shuffle groups values by key, and reducers combine each group. Word count is the classic example."],
+    ["What are windows?", "Ways to group an endless stream by time: tumbling (fixed, no overlap), sliding (overlapping) and session (based on gaps in a user’s activity)."],
+    ["Event time vs processing time?", "Event time is when it happened; processing time is when the system saw it. Late or out-of-order events make them differ, so windows should use event time."],
+    ["What is a watermark?", "An estimate of how far event time has progressed. When it passes the end of a window, the window closes; very late events are dropped or sent to a side output."],
+    ["What is exactly-once processing?", "Effectively once: at-least-once delivery plus checkpoints and idempotent or transactional sinks produce results as if each event were processed once."],
+    ["Lambda vs kappa architecture?", "Lambda keeps separate batch and speed layers that must agree; kappa uses a single stream pipeline and replays the log to reprocess."]
+  ]
+},
+dr: {
+  def: "Disaster recovery is planning to keep a system running, or bring it back, after a whole data center or region fails. The key targets are RPO (how much data you can lose) and RTO (how long you can be down). Options range from backups, to a standby region, to active-active regions serving users at once, each costing more and being safer.",
+  terms: [
+    ["RPO", "Recovery point objective: the most data you can afford to lose, as time"],
+    ["RTO", "Recovery time objective: the longest you can afford to be down"],
+    ["Active-passive", "One region serves; a standby takes over on failure"],
+    ["Active-active", "Several regions serve users at the same time"],
+    ["Failover", "Moving traffic and roles to the standby"],
+    ["Replication lag", "How far behind the copy is"],
+    ["Data residency", "Rules that require some data to stay in a country or region"],
+    ["Game day", "A planned exercise that breaks something on purpose to test recovery"]
+  ],
+  notes: [
+    "An untested backup is not a backup; restore regularly.",
+    "Async replication is fast but can lose the last seconds; sync is safer but slower.",
+    "Active-active needs a plan for conflicting writes.",
+    "Keep DNS TTLs short so failover takes effect quickly.",
+    "Choose the cheapest setup that meets RPO and RTO."
+  ],
+  qs: [
+    ["Explain RPO and RTO.", "RPO is the acceptable data loss measured in time; RTO is the acceptable downtime. They drive the design and its cost."],
+    ["Active-passive vs active-active?", "Active-passive has one serving region and a standby; simpler but with idle capacity. Active-active serves from all regions, which gives lower latency and better uptime but requires conflict handling."],
+    ["How does failover work?", "Health checks detect the failure, a global load balancer or DNS shifts traffic to another region, and the replica database is promoted to primary."],
+    ["How do you handle write conflicts across regions?", "Avoid them with a home region per user, or use last-write-wins (simple, loses writes) or merge strategies and CRDTs."],
+    ["Sync vs async replication?", "Sync waits for the remote copy (no loss, higher latency, blocked if remote is down). Async returns immediately and may lose the last seconds on failure."],
+    ["How do you test disaster recovery?", "Restore backups on a schedule, run game days or chaos experiments that fail a region on purpose, and automate and rehearse the runbook."]
+  ]
+},
+crdt: {
+  def: "In systems that stay writable during failures, copies of data can change independently and disagree. Logical clocks and vector clocks track which update could have seen which. Conflicts are resolved by last-write-wins (which can lose data), by merging, or by CRDTs, data types designed to always converge. Gossip spreads information between nodes, and Merkle trees and read repair fix drift.",
+  terms: [
+    ["Lamport clock", "A counter that orders events by cause without real time"],
+    ["Vector clock", "One counter per node; shows whether two versions are ordered or concurrent"],
+    ["Concurrent update", "Two changes made without either seeing the other"],
+    ["Last-write-wins", "Keep the newest timestamp and drop the rest"],
+    ["CRDT", "A data type whose replicas always merge to the same result"],
+    ["Gossip protocol", "Nodes periodically share state with a few random peers"],
+    ["Merkle tree", "A tree of hashes used to find differing data ranges quickly"],
+    ["Read repair", "Fixing stale replicas when a read notices a mismatch"]
+  ],
+  notes: [
+    "Wall clocks drift, so timestamps cannot reliably order events.",
+    "Last-write-wins silently loses concurrent changes.",
+    "CRDT merges are commutative, associative and idempotent.",
+    "Gossip reaches N nodes in about log N rounds.",
+    "Keep money and stock in a transactional store, not an eventually consistent one."
+  ],
+  qs: [
+    ["Why not use timestamps?", "Clocks differ between machines, so the “latest” write may be wrong, and a good write can be lost. Logical or vector clocks track causality instead."],
+    ["What is a vector clock?", "A map of per-node counters attached to a value. If one dominates the other it is newer; otherwise the updates were concurrent and must be reconciled."],
+    ["How do you resolve conflicts?", "Last-write-wins (lossy), keep siblings and let the application merge, or use CRDTs that merge automatically."],
+    ["What is a CRDT?", "A conflict-free replicated data type, such as a counter, set or text sequence, designed so merging in any order gives the same result without coordination."],
+    ["How does gossip work?", "Each node regularly shares state with a few random peers. Information spreads exponentially, so all nodes learn in about log N rounds without a central coordinator."],
+    ["What are Merkle trees used for here?", "Replicas compare root hashes; if they differ they compare child hashes and only synchronise the ranges that differ, so anti-entropy repair is cheap."]
+  ]
+},
+k8s: {
+  def: "A container packs an app with its exact libraries so it runs the same everywhere. Kubernetes runs many containers across machines: you declare the desired state and its control loop keeps the actual state equal to it, restarting, replacing and scaling pods. Release strategies such as rolling, blue-green and canary update software without downtime.",
+  terms: [
+    ["Container image", "A sealed package of an app and its dependencies"],
+    ["Pod", "The smallest Kubernetes unit: one or more containers run together"],
+    ["Node", "A machine in the cluster"],
+    ["Deployment", "Declares how many copies of a pod to keep running"],
+    ["Service", "A stable address in front of changing pods"],
+    ["Control loop", "Compares desired state with actual state and fixes differences"],
+    ["Readiness / liveness probe", "Checks for ready-for-traffic and still-alive"],
+    ["Canary / blue-green", "Release strategies: send a small slice first, or switch between two full copies"]
+  ],
+  notes: [
+    "Containers share the host kernel: lighter than VMs but isolate less.",
+    "Set resource requests and limits for every container.",
+    "Never deploy the image tag “latest”; pin a version or hash.",
+    "Keep config and secrets outside the image.",
+    "Rolling needs no extra capacity; blue-green doubles it; canary needs good monitoring."
+  ],
+  qs: [
+    ["Container vs VM?", "A VM includes a full guest OS and is heavy and slow to start; a container shares the host kernel and includes only the app and libraries, so it is small and starts in seconds."],
+    ["What problem does Kubernetes solve?", "Running, scheduling, healing, scaling and updating many containers across machines automatically from a declared desired state."],
+    ["What happens when a pod crashes?", "The controller sees actual below desired and starts a replacement on a healthy node; the Service sends traffic only to pods that pass readiness checks."],
+    ["Rolling vs blue-green vs canary?", "Rolling replaces pods gradually. Blue-green keeps two full environments and switches instantly, with easy rollback but double cost. Canary shifts a small percentage first and watches metrics."],
+    ["Readiness vs liveness probes?", "Readiness decides whether a pod receives traffic; liveness decides whether it should be restarted."],
+    ["What goes wrong without resource limits?", "One pod can consume all the memory or CPU on a node, causing evictions or node failure and affecting other pods."]
+  ]
 }
 };
 // Topics 13-19 are now full episodes (see videos.js); __EXTRA is kept for future notes-only topics

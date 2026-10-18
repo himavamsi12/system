@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "voices": "node --env-file-if-exists=.env.local scripts/generate-voices.mjs"
   },
   "dependencies": {
     "next": "^16.4.2",
