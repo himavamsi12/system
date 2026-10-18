@@ -639,14 +639,6 @@ txn: {
   ]
 }
 };
-// Additional topics (notes only, no video yet): shown in the sidebar under ADDITIONAL TOPICS
-window.__EXTRA=[
-  {id:'est',title:'Back-of-envelope estimation',sub:'QPS, storage and bandwidth math'},
-  {id:'idx',title:'Indexing & storage engines',sub:'B-tree vs LSM tree, SQL vs NoSQL'},
-  {id:'cdn',title:'CDN & edge delivery',sub:'Static content and video, worldwide'},
-  {id:'uid',title:'Unique ID generation',sub:'Snowflake, UUID, ticket servers'},
-  {id:'api',title:'API design',sub:'Pagination, versioning, idempotency, bulk'},
-  {id:'prob',title:'Probabilistic structures',sub:'Bloom filter, HyperLogLog, count-min'},
-  {id:'txn',title:'Transactions & isolation',sub:'ACID, anomalies, optimistic vs pessimistic'}
-];
+// Topics 13-19 are now full episodes (see videos.js); __EXTRA is kept for future notes-only topics
+window.__EXTRA=[];
 window.dispatchEvent(new Event('notes-ready'));

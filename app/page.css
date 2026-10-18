@@ -492,3 +492,22 @@ html[data-theme="dark"] .wrap{background:none}
 .wrap[data-view="topic"] #tabs button.on i{background:var(--soft);color:var(--muted)}
 html[data-theme="dark"] .tabs.extra button.on{background:#e0583a}
 @media (min-width:1081px){.wrap[data-view="topic"]{min-height:100vh;padding-block:24px 56px;align-content:start}}
+
+/* Recap ("What to remember") slide */
+.card .li2{fill:var(--ink);font-family:var(--sans);font-size:16px}
+.card .li2.sm{font-size:14px}
+.card .li2.mut{fill:var(--muted);font-size:13.5px}
+.card .nb{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.5}
+.card .num{fill:var(--accent);font-family:var(--mono);font-size:13px;font-weight:700;text-anchor:middle}
+.card .chip{fill:var(--muted);font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.12em}
+.card .col{fill:var(--soft);stroke:var(--line);stroke-width:1.5}
+.card .rcall rect:first-child{fill:var(--accent-soft)}
+.card .rcall .stripe{fill:var(--accent)}
+.card .rcall-bad rect:first-child{fill:var(--bad-soft)}
+.card .rcall-bad .stripe{fill:var(--bad)}
+.card .cot{fill:var(--ink);font-family:var(--sans);font-size:15px;font-weight:600}
+.card .colab{fill:var(--accent);font-family:var(--mono);font-size:12px;font-weight:700;letter-spacing:.04em}
+.card .ic-ok{fill:var(--ok-soft)} .card .ic-bad{fill:var(--bad-soft)}
+.card .ic-okp,.card .ic-badp{fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.card .ic-okp{stroke:var(--ok)} .card .ic-badp{stroke:var(--bad)}
+.tabs .lbl{grid-column:1/-1;margin-top:16px}

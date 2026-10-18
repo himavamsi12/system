@@ -5,9 +5,9 @@ import './page.css';
 
 export const metadata: Metadata = {
   title: "Concept Lab",
-  description: "12 animated 3D explainers, one for every core system design topic, scene by scene.",
+  description: "19 animated 3D explainers, one for every core system design topic, scene by scene.",
   
-  openGraph: { title: "Concept Lab", description: "12 animated 3D explainers, one for every core system design topic, scene by scene.", type: 'website' },
+  openGraph: { title: "Concept Lab", description: "19 animated 3D explainers, one for every core system design topic, scene by scene.", type: 'website' },
 };
 
 const Page = () => (
